@@ -3,3 +3,4 @@ d 'twowayfeweights': Estimates the weights attached to the two-way fixed effects
 d 
 d 
 F twowayfeweights.ado
+F twowayfeweights.sthlp
