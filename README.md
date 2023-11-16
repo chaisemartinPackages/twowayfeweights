@@ -8,8 +8,10 @@ ssc install twowayfeweights, replace
 ## Syntax
 
 ```s
-twowayfeweights Y G T D,type(string) [summary_measures test_random_weights(varlist)
-controls(varlist) other_treatments(varlist) weight(varlist) path(string)]
+twowayfeweights Y G T D,
+  type(string)
+  [summary_measures test_random_weights(varlist)
+  controls(varlist) other_treatments(varlist) weight(varlist) path(string)]
 ```
 {synoptset 28 tabbed}{...}
 
