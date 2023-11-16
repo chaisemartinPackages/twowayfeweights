@@ -1,0 +1,8 @@
+v 2.0.0
+d Clément de Chaisemartin, Xavier D'Haultfoeuille, Antoine Deeb
+d chaisemartin.packages@gmail.com
+d https://github.com/chaisemartinPackages/twowayfeweights
+
+d 'twowayfeweights':  Estimates the weights attached to the two-way fixed effects regressions studied in de Chaisemartin & D'Haultfoeuille (2020a)
+
+p twowayfeweights
