@@ -7,11 +7,6 @@ Estimates the weights attached to the two-way fixed effects regressions studied 
 ssc install twowayfeweights, replace
 ```
 
-or from GitHub
-
-```s
-net install twowayfeweights, from("https://raw.githubusercontent.com/chaisemartinPackages/twowayfeweights/main") replace
-```
 ## Syntax
 
 ```s
