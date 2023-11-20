@@ -30,10 +30,8 @@ program twowayfeweights, eclass
 	gen `time'=`3'
 	gen `meantreat'=`4'
 	if "`type'"=="fdTR" {
-		gegen treatment_temp = mean(`meantreat'), by(`group' `time')
-		tempvar treatment
-		gen `treatment'= treatment_temp
-		drop treatment_temp
+	tempvar treatment
+	gen `treatment'=`5'
 	}
 	
 	preserve
@@ -43,8 +41,18 @@ program twowayfeweights, eclass
 	keep `if'
 	}
 	
-	if strpos("`weight'", "weight") == 0  { 
-		cap rename weight weight_OG
+	* Account for the presence of weight vars in the data
+	if strpos("`weight'", "weight") > 0  { 
+		cap rename `weight' var_weight
+		local weight "var_weight"
+	}
+	cap confirm var weight
+	if _rc == 0 {
+		local p = 1
+		foreach v of varlist weight* {
+			cap rename `v' weight_OG`p'
+			local p = `p' + 1
+		}
 	}
 
 	if "`type'"!="fdTR" {
@@ -412,16 +420,17 @@ restore
 	di as result  "{hline 48}"
 
 	if "`summary_measures'" != "" {
+		local subscr = substr("`type'", 1, 2)
 		local srow_1 "Summary Measures:"
 		local discl "Reference: Corollary 1, de Chaisemartin, C and D'Haultfoeuille, X (2020a)"
-		local srow_fe "TWFE coefficient (`=uchar(946)'_fe) = `: di %9.4f beta'"
-		local srow_2 "min `=uchar(963)'(`=uchar(916)') compatible with `=uchar(946)'_fe and `=uchar(916)'_TR = 0: `: di %9.4f sensibility'"
+		local srow_fe "TWFE coefficient (`=uchar(946)'_`subscr') = `: di %9.4f beta'"
+		local srow_2 "min `=uchar(963)'(`=uchar(916)') compatible with `=uchar(946)'_`subscr' and `=uchar(916)'_TR = 0: `: di %9.4f sensibility'"
 		di as result ""
 		di as result "`srow_1'"
 		di as result "`srow_fe'"
 		di as result "`srow_2'"
 		if summinus<0{
-			local srow_3 "min `=uchar(963)'(`=uchar(916)') compatible with `=uchar(946)'_fe and `=uchar(916)'_TR of a different sign: `: di %9.4f sensibility2'"					
+			local srow_3 "min `=uchar(963)'(`=uchar(916)') compatible with `=uchar(946)'_`subscr' and `=uchar(916)'_TR of a different sign: `: di %9.4f sensibility2'"					
 			di as result "`srow_3'"
 		}
 		di as text "`discl'"
@@ -439,6 +448,9 @@ restore
 	matrix list B
 	ereturn matrix randomweightstest1 = B
 	}
+
+	display _newline
+	di as text "The development of this package was funded by the European Union (ERC, REALLYCREDIBLE,GA N°101043899)."
 	
 	}
 	
@@ -470,8 +482,18 @@ if "`other_treatments'"!=""{
 	keep `if'
 	}
 
-	if strpos("`weight'", "weight") == 0  { 
-		cap rename weight weight_OG
+	* Account for the presence of weight vars in the data * 
+	if strpos("`weight'", "weight") > 0  { 
+		cap rename `weight' var_weight
+		local weight "var_weight"
+	}
+	cap confirm var weight
+	if _rc == 0 {
+		local p = 1
+		foreach v of varlist weight* {
+			cap rename `v' weight_OG`p'
+			local p = `p' + 1
+		}
 	}
 	
 	* Keeping only sample used in estimation of regression
@@ -748,6 +770,9 @@ restore
 	matrix list B
 	ereturn matrix randomweightstest1 = B
 	}
+
+	display _newline
+	di as text "The development of this package was funded by the European Union (ERC, REALLYCREDIBLE,GA N°101043899)."
 	
 	
 	}
