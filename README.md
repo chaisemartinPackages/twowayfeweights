@@ -51,6 +51,23 @@ The previous sensitivity exercise assumes that treatment effects follow a unifor
 #### *How can I tell if the second summary measure is high or low?*
 Assume that the second summary measure is equal to x. To fix ideas, let us assume that beta>0. Let us assume that the treatment effects of (g,t) cells are drawn from a uniform distribution.  Then, one could have that those effects are all negative, with a standard deviation equal to x, for instance if they are uniformly drawn from the [-2sqrt(3)x,0]. Then, you can ask yourself: is it reasonable to assume that some (g,t) cells have a treatment effect as low as -2sqrt(3)x? If the answer is negative, that is, you are not willing to assume that some (g,t) cells have a treatment effect lower than -2sqrt(3)x, this means that the uniform distribution of treatment effects compatible with sign reversal and a standard deviation of x seems implausible to you. Then, you can consider that the command's second summary measure is high, and that sign reversal is unlikely. If the treatment effects of (g,t) cells are all negative, they cannot follow a normal distribution, so we do not discuss that possibility here.
 
+## Example
+The following example is based on data from F. Vella and M. Verbeek (1998), "Whose Wages Do Unions Raise? A Dynamic Model of Unionism and Wage Rate Determination for Young Men". 
+Results and further details about the estimation below can be found in Section V.C of de Chaisemartin & D'Haultfoeuille (2020a).
+Run the following line to load the dataset:
+```s
+use "https://raw.githubusercontent.com/chaisemartinPackages/twowayfeweights/main/wagepan_twfeweights.dta", clear
+```
+
+The next line estimates the weights from a TWFE regression of log wage (Y) on union status (D), individual worker (G) and year (T) fixed effects:
+```s
+twowayfeweights lwage nr year union, type(feTR) test_random_weights(educ) summary_measures
+```
+
+The next line performs the same exercise using first differences of outcome and treatment:
+```s
+twowayfeweights diff_lwage nr year diff_union union, type(fdTR) test_random_weights(educ) summary_measures
+```
 
 ## References
 
@@ -62,6 +79,8 @@ Assume that the second summary measure is equal to x. To fix ideas, let us assum
 + Clément de Chaisemartin, University of California at Santa Barbara, Santa Barbara, California, USA.
 + Xavier D'Haultfoeuille, CREST, Palaiseau, France.
 + Antoine Deeb, University of California at Santa Barbara, Santa Barbara, California, USA.
+
+The development of this package was funded by the European Union (ERC, REALLYCREDIBLE,GA N°101043899).
 
 ## Contact
 
