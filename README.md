@@ -14,7 +14,7 @@ net install twowayfeweights, from("https://raw.githubusercontent.com/chaisemarti
 ## Syntax
 
 ```s
-twowayfeweights Y G T D, type(string)
+twowayfeweights Y G T D [D0], type(string)
   [summary_measures test_random_weights(varlist)
   controls(varlist) other_treatments(varlist) weight(varlist) path(string)]
 ```
@@ -23,6 +23,7 @@ twowayfeweights Y G T D, type(string)
 + **G** is a variable identifying each group.
 + **T** is a variable identifying each period.
 + **D** is the treatment variable in the regression. **D** is the level of the treatment if one wants to estimate the weights attached to the fixed-effects regression, and **D** is the first difference of the treatment if one wants to estimate the weights attached to the first-difference regression.
++ If **type**(*fdTR*) is specified in the option type below, then the command requires a fifth argument, **D0**. **D0** is the mean of the treatment in group g and at period t.  It should be non-missing at the first period when a group appears in the data (e.g. at t=1 for the groups that are in the data from the beginning), and for all observations for which the first-difference of the group-level mean outcome and treatment are non missing.
   
 ### Options 
 
