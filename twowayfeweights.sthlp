@@ -84,7 +84,13 @@ effect does not change over time.
 {p_end}
 
 {p 4 8}
-{cmd: summary_measures} displays complementary results from the computation of the weights. Specifically, the option outputs: ({it:i}) the point estimate of the coefficient on the {cmd:D} variable from a TWFE regression, ({it:ii}) the minimum value of the standard deviation of the ATEs compatible with the coefficient from the TWFE regression and ATE across all treated (g,t) cells being equal to zero, ({it:iii}) the minimum value of the standard deviation of the ATEs compatible with the coefficient from the TWFE regression and ATE across all treated (g,t) cells having different signs (this is computed only if the sum of negative weights is different from 0). See the FAQ section for other details.
+{cmd: summary_measures} displays complementary results from the computation of the weights. 
+Specifically, the option outputs: ({it:i}) the point estimate of the coefficient on the {cmd:D} variable from a TWFE regression, 
+({it:ii}) the minimum value of the standard deviation of the ATEs compatible with the coefficient from the TWFE regression 
+and ATE across all treated (g,t) cells being equal to zero, ({it:iii}) the minimum value of the 
+standard deviation of the ATEs compatible with the coefficient from the TWFE regression and ATE across 
+all treated (g,t) cells having different signs (this is computed only if the sum of negative weights is 
+different from 0). See the FAQ section for other details.
 
 {p 4 8}
 {cmd:test_random_weights} when this option is specified, the command estimates
