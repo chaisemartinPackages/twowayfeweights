@@ -15,6 +15,7 @@ net install twowayfeweights, from("https://raw.githubusercontent.com/chaisemarti
 
 ## Syntax
 
+Stata:
 ```s
 twowayfeweights Y G T D [D0], type(string)
   [summary_measures test_random_weights(varlist)
