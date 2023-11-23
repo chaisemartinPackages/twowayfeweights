@@ -9,10 +9,6 @@ Stata (SSC):
 ssc install twowayfeweights, replace
 ```
 
-```s
-net install twowayfeweights, from("https://raw.githubusercontent.com/chaisemartinPackages/twowayfeweights/main/Stata") replace
-```
-
 ## Syntax
 
 Stata:
