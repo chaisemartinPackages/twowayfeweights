@@ -1,10 +1,18 @@
-library(dplyr)
-options(dplyr.summarise.inform = FALSE)
-library(fixest)
-library(estimatr)
-library(stringr)
-library(huxtable)
+#Install and Import all the packages
+packages <- c("data.table", "dplyr", "logr", "estimatr", "huxtable", "magrittr", "fixest")
 
+ds_libraries <- function(packages){
+  for(package in packages){
+    if(!require(package, character.only = TRUE)){
+      install.packages(package, dependencies = TRUE)
+    }
+    #Load package
+    library(package, character.only = TRUE)
+  }
+}
+ds_libraries(packages)
+
+options(dplyr.summarise.inform = FALSE)
 suppressWarnings({
 setFixest_notes(FALSE)
 
