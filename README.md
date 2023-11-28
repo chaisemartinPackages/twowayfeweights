@@ -9,6 +9,11 @@ Stata (SSC):
 ssc install twowayfeweights, replace
 ```
 
+R (GitHub):
+```s
+install_github("chaisemartinPackages/twowayfeweights/R")
+```
+
 ## Syntax
 
 Stata:
@@ -17,6 +22,13 @@ twowayfeweights Y G T D [D0], type(string)
   [summary_measures test_random_weights(varlist)
   controls(varlist) other_treatments(varlist) weight(varlist) path(string)]
 ```
+
+R:
+```s
+twowayfeweights(df, Y, G, T, D, D0 = NULL, type, summary_measures = NULL,
+controls = c(), weights = NULL, other_treatments = c(), test_random_weights = c(), path = NULL)
+```
+
 ## Description
 + **Y** is the dependent variable in the regression. **Y** is the level of the outcome if one wants to estimate the weights attached to the fixed-effects regression, and **Y** is the first difference of the outcome if one wants to estimate the weights attached to the first-difference regression.
 + **G** is a variable identifying each group.
@@ -69,6 +81,31 @@ The next line performs the same exercise using first differences of outcome and 
 ```s
 twowayfeweights diff_lwage nr year diff_union union, type(fdTR) test_random_weights(educ) summary_measures
 ```
+
+### R
+Run the following line to download the dataset in your local working directory and load it to your R environment:
+```s
+#install.packages("haven")
+library(haven)
+url <- "https://raw.githubusercontent.com/chaisemartinPackages/twowayfeweights/main/wagepan_twfeweights.dta"
+cwd <- getwd()
+file <- paste(cwd, "/wagepan_twfeweights.dta", sep = "")
+download.file(url, file , mode = "wb")
+wagepan <-  read_dta(file)
+```
+
+The next line estimates the weights from a TWFE regression of log wage (Y) on union status (D), individual worker (G) and year (T) fixed effects:
+```s
+twowayfeweights(wagepan, "lwage", "nr", "year", "union", type = "feTR", summary_measures = TRUE, test_random_weights = c("educ"))
+```
+
+The next line performs the same exercise using first differences of outcome and treatment:
+```s
+twowayfeweights(wagepan, "diff_lwage", "nr", "year", "diff_union", type = "fdTR", D0 = "union", summary_measures = TRUE, test_random_weights = c("educ"))
+```
+
+#### Warning
+Please note that the number of negative weights could be different from Section V.C. of de Chaisemartin and D'Haultfoeuille (2020a) due to rounding errors that affected older versions of the commands.
 
 ## References
 
