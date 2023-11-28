@@ -85,6 +85,7 @@ twowayfeweights diff_lwage nr year diff_union union, type(fdTR) test_random_weig
 ### R
 Run the following line to download the dataset in your local working directory and load it to your R environment:
 ```s
+library(TwoWayFEWeights)
 #install.packages("haven")
 library(haven)
 url <- "https://raw.githubusercontent.com/chaisemartinPackages/twowayfeweights/main/wagepan_twfeweights.dta"
