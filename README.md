@@ -11,6 +11,7 @@ ssc install twowayfeweights, replace
 
 R (GitHub):
 ```s
+library(devtools)
 install_github("chaisemartinPackages/twowayfeweights/R")
 ```
 
