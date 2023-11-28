@@ -113,12 +113,12 @@ Please note that the number of negative weights could be different from Section 
 + de Chaisemartin, C and D'Haultfoeuille, X (2020b). [Two-way fixed effects regressions with several treatments](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3751060).
 
 ## Authors
-+ Antoine Deeb, University of California at Santa Barbara, Santa Barbara, California, USA.
-+ Shuo Zhang, University of California at Santa Barbara, Santa Barbara, California, USA.
 + Diego Ciccia, Economics Department, Sciences Po, France.
++ Antoine Deeb, University of California at Santa Barbara, Santa Barbara, California, USA.
 + Mélitine Malezieux, Economics Department, Sciences Po, France.
 + Felix Knau, Economics Department, Sciences Po, France.
-+ Doulo Sow, Economics Department, Sciences Po, France.
++ Doulo Sow, Economics Department, Sciences Po and ENSAE, France.
++ Shuo Zhang, University of California at Santa Barbara, Santa Barbara, California, USA.
 + Clément de Chaisemartin, Economics Department, Sciences Po, France.
 + Xavier D'Haultfoeuille, CREST, Palaiseau, France.
 
