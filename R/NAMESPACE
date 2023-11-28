@@ -1,0 +1,10 @@
+import(dplyr)
+import(fixest)
+import(estimatr)
+import(stringr)
+import(huxtable)
+importFrom("stats", "as.formula", "cov", "lm", "predict", "residuals",
+           "sd", "coef", "weighted.mean")
+importFrom("rlang", ":=")
+
+export(twowayfeweights)
