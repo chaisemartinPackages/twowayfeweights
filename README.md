@@ -89,11 +89,11 @@ Run the following line to download the dataset in your local working directory a
 library(TwoWayFEWeights)
 #install.packages("haven")
 library(haven)
-url <- "https://raw.githubusercontent.com/chaisemartinPackages/twowayfeweights/main/wagepan_twfeweights.dta"
+url <- "https://raw.githubusercontent.com/chaisemartinPackages/twowayfeweights/main/wagepan_twfeweights.csv"
 cwd <- getwd()
 file <- paste(cwd, "/wagepan_twfeweights.dta", sep = "")
 download.file(url, file , mode = "wb")
-wagepan <-  read_dta(file)
+wagepan <-  read.csv(file)
 ```
 
 The next line estimates the weights from a TWFE regression of log wage (Y) on union status (D), individual worker (G) and year (T) fixed effects:
