@@ -1,0 +1,32 @@
+Package: TwoWayFEWeights
+Type: Package
+Title: Estimation of the Weights Attached to the Two-Way Fixed Effects
+        Regressions
+Version: 2.0.0
+Authors@R: 
+    c(person("Shuo", "Zhang", role = c("aut", "cre"), email = "shuo_zhang@ucsb.edu"),
+	person("Diego", "Ciccia", role = c("aut", "cre"), email = "diego.ciccia@sciencespo.fr"),
+	person("Mélitine", "Malezieux", role = c("aut", "cre"), email = "melitine.malezieux@sciencespo.fr"),	
+	person("Felix", "Knau", role = c("aut", "cre"), email = "felix.knau@sciencespo.fr"),
+	person("Doulo", "Sow", role = c("aut", "cre"), email = "doulo.sow@ensae.fr"),
+      	person("Clément", "de Chaisemartin", role = "aut", email = "clement.dechaisemartin@sciencespo.fr"))
+Maintainer: ERC REALLYCREDIBLE RA Team <chaisemartin.packages@gmail.com>
+Description: 
+    Estimates the weights and measure of robustness to treatment effect heterogeneity attached to two-way fixed effects regressions.
+    Clément de Chaisemartin, Xavier D'Haultfœuille (2020) <DOI: 10.1257/aer.20181169>.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Depends: R(>= 3.4.0)
+Imports: dplyr (>= 1.0.0), fixest (>= 0.6.0), stringr, stats, estimatr, huxtable,
+        rlang
+Suggests: wooldridge
+NeedsCompilation: no
+Packaged: 
+Author: Shuo Zhang [aut, cre],
+	Diego Ciccia [aut, cre],
+	Felix Knau [aut, cre],
+	Mélitine Malezieux [aut, cre],
+	Doulo Sow [aut, cre],
+  	Clément de Chaisemartin [aut]
+Repository: CRAN
+Date/Publication:
