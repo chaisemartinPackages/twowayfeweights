@@ -7,7 +7,7 @@ ds_libraries <- function(packages){
       install.packages(package, dependencies = TRUE)
     }
     #Load package
-    library(package, character.only = TRUE)
+    library(package)
   }
 }
 ds_libraries(packages)
