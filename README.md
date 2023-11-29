@@ -1,6 +1,6 @@
 
 # twowayfeweights
-Estimates the weights attached to the two-way fixed effects regressions studied in de Chaisemartin &amp; D'Haultfoeuille (2020a), as well as summary measures of these regressions' robustness to heterogeneous treatment effects.
+Estimates the weights attached to the two-way fixed effects regressions studied in [de Chaisemartin & D'Haultfoeuille (2020a)](https://www.aeaweb.org/articles?id=10.1257/aer.20181169), as well as summary measures of these regressions' robustness to heterogeneous treatment effects.
 
 ## Setup 
 
@@ -9,7 +9,7 @@ Stata (SSC):
 ssc install twowayfeweights, replace
 ```
 
-R (GitHub):
+R (GitHub) *CRAN coming soon*:
 ```s
 library(devtools)
 install_github("chaisemartinPackages/twowayfeweights/R")
