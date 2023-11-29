@@ -1,10 +1,16 @@
-import(dplyr)
-import(fixest)
-import(estimatr)
-import(stringr)
-import(huxtable)
-importFrom("stats", "as.formula", "cov", "lm", "predict", "residuals",
-           "sd", "coef", "weighted.mean")
-importFrom("rlang", ":=")
+# Default NAMESPACE created by R
+# Remove the previous line if you edit this file
 
-export(twowayfeweights)
+# Export all names
+exportPattern(".")
+
+# Import all packages listed as Imports or Depends
+import(
+  dplyr,
+  fixest,
+  stringr,
+  stats,
+  estimatr,
+  huxtable,
+  rlang
+)

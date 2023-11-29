@@ -17,8 +17,7 @@ Description:
 License: MIT + file LICENSE
 Encoding: UTF-8
 Depends: R(>= 3.4.0)
-Imports: dplyr (>= 1.0.0), fixest (>= 0.6.0), stringr, stats, estimatr, huxtable,
-        rlang
+Imports: dplyr, fixest, stringr, stats, estimatr, huxtable, rlang
 Suggests: wooldridge
 NeedsCompilation: no
 Packaged: 
@@ -30,3 +29,4 @@ Author: Shuo Zhang [aut, cre],
   	Clément de Chaisemartin [aut]
 Repository: CRAN
 Date/Publication:
+RoxygenNote: 7.2.3
