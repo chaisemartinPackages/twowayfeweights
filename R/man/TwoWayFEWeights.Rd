@@ -8,7 +8,9 @@
 
 \usage{
 
-  twowayfeweights(df, Y, G, T, D, D0 = NULL, type, summary_measures = NULL, controls = c(), weights = NULL, other_treatments = c(), test_random_weights = c(), path = NULL)
+  twowayfeweights(df, Y, G, T, D, type, D0 = NULL, summary_measures = NULL, 
+  controls = c(), weights = NULL, other_treatments = c(), 
+  test_random_weights = c(), path = NULL)
 }
 
 \arguments{
@@ -44,27 +46,39 @@
 
 \examples{
 
-# The following example is based on data from F. Vella and M. Verbeek (1998), "Whose Wages Do Unions Raise? A Dynamic Model of Unionism and Wage Rate Determination for Young Men". 
-# Results and further details about the estimation below can be found in Section V.C of de Chaisemartin & D'Haultfoeuille (2020a).
-# Run the following line to download the dataset in your local working directory and load it to your R environment:
+# The following example is based on data from F. Vella and M. Verbeek (1998), 
+# "Whose Wages Do Unions Raise? A Dynamic Model of Unionism and Wage Rate 
+# Determination for Young Men". 
+# Results and further details about the estimation below can be found in 
+# Section V.C of de Chaisemartin & D'Haultfoeuille (2020a).
+# Run the following line to download the dataset in your local working 
+# directory and load it to your R environment:
 
 #install.packages("haven")
 library(haven)
-url <- "https://raw.githubusercontent.com/chaisemartinPackages/twowayfeweights/main/wagepan_twfeweights.dta"
+base <- "https://raw.githubusercontent.com/chaisemartinPackages/"
+rep <- "twowayfeweights/main/wagepan_twfeweights.dta"
+url <- paste(base, rep, sep = "")
 cwd <- getwd()
 file <- paste(cwd, "/wagepan_twfeweights.dta", sep = "")
 download.file(url, file , mode = "wb")
 wagepan <-  read_dta(file)
 
-# The next line estimates the weights from a TWFE regression of log wage (Y) on union status (D), individual worker (G) and year (T) fixed effects:
+# The next line estimates the weights from a TWFE regression of log wage (Y) on 
+# union status (D), individual worker (G) and year (T) fixed effects:
 
-twowayfeweights(wagepan, "lwage", "nr", "year", "union", type = "feTR", summary_measures = TRUE, test_random_weights = c("educ"))
+twowayfeweights(wagepan, "lwage", "nr", "year", "union", type = "feTR", 
+summary_measures = TRUE, test_random_weights = c("educ"))
 
-# The next line performs the same exercise using first differences of outcome and treatment:
+# The next line performs the same exercise using first differences of outcome
+#  and treatment:
 
-twowayfeweights(wagepan, "diff_lwage", "nr", "year", "diff_union", type = "fdTR", D0 = "union", summary_measures = TRUE, test_random_weights = c("educ"))
+twowayfeweights(wagepan, "diff_lwage", "nr", "year", "diff_union", type = "fdTR", 
+D0 = "union", summary_measures = TRUE, test_random_weights = c("educ"))
 
-# Please note that the number of negative weights could be different from Section V.C. of de Chaisemartin and D'Haultfoeuille (2020a) due to rounding errors that affected older versions of the commands.
+# Please note that the number of negative weights could be different from Section 
+# V.C. of de Chaisemartin and D'Haultfoeuille (2020a) due to rounding errors that 
+# affected older versions of the commands.
 
 }
 
