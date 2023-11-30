@@ -218,8 +218,8 @@ program twowayfeweights, eclass
 	gen E_eps_1_g_geqt = E_eps_1_g_geqt_aux / weight_XX_aux 
 	sort `group' newt
 	drop eps_1_weight E_eps_1_g_geqt_aux weight_XX_aux
+
 	*Computing beta
-	
 	areg `outcome' i.`time' `meantreat' `controls' [aweight=weight_XX], absorb(`group')
 	scalar beta=_b[`meantreat']
 
@@ -284,7 +284,11 @@ program twowayfeweights, eclass
 	}
 	
 /// Results	
-	
+
+	* Adjusting positive and negative weights that are close to 0
+	local limit_sensitivity = 10^(-10)
+	replace weight = 0 if abs(weight) < `limit_sensitivity' 
+
 	* Computing the sum and the number of positive/negative weights
 		
 	egen total_weight_plus=total(weight) if weight>0&weight!=.
@@ -307,7 +311,7 @@ program twowayfeweights, eclass
 	matrix A =0,0,0,0
 	if "`test_random_weights'"!=""{
 	foreach var of varlist `test_random_weights' {
-	reg `var' W [pweight=nat_weight], cluster(`group') 
+	reg `var' W [pweight=nat_weight], cluster(`group') robust 
 	matrix A =A\_b[W],_se[W],_b[W]/_se[W], ((_b[W]>=0)-(_b[W]<0))*sqrt(e(r2)) 
 	}
 	matrix B = A[2..., 1...]

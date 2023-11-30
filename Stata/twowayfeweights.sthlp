@@ -240,6 +240,8 @@ The next line performs the same exercise using first differences of outcome and 
 
 {phang2}{stata twowayfeweights diff_lwage nr year diff_union union, type(fdTR) test_random_weights(educ) summary_measures}{p_end}
 
+Please note that the number of negative weights could be different from Section V.C. of de Chaisemartin and D'Haultfoeuille (2020a) due to rounding errors that affected older versions of the commands.
+
 {marker references}{...}
 {title:References}
 
