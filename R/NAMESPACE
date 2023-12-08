@@ -5,12 +5,19 @@
 exportPattern(".")
 
 # Import all packages listed as Imports or Depends
+
 import(
-  dplyr,
-  fixest,
-  stringr,
-  stats,
-  estimatr,
-  huxtable,
-  rlang
+  "conflicted",
+  "dplyr",
+  "fixest",
+  "stringr",
+  "estimatr",
+  "rlang",
+  "utils",
+  "haven"
 )
+
+import("huxtable", except=c("add_rownames"))
+importFrom("stats", "as.formula", "cov", "lm", "predict", "residuals", "sd", "coef", "weighted.mean", "weights")
+
+

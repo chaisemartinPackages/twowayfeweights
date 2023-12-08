@@ -4,29 +4,26 @@ Title: Estimation of the Weights Attached to the Two-Way Fixed Effects
         Regressions
 Version: 2.0.0
 Authors@R: 
-    c(person("Shuo", "Zhang", role = c("aut", "cre"), email = "shuo_zhang@ucsb.edu"),
-	person("Diego", "Ciccia", role = c("aut", "cre"), email = "diego.ciccia@sciencespo.fr"),
-	person("Mélitine", "Malezieux", role = c("aut", "cre"), email = "melitine.malezieux@sciencespo.fr"),	
-	person("Felix", "Knau", role = c("aut", "cre"), email = "felix.knau@sciencespo.fr"),
-	person("Doulo", "Sow", role = c("aut", "cre"), email = "doulo.sow@ensae.fr"),
+    c(person("Diego", "Ciccia", role = c("aut", "cre"), email = "diego.ciccia@sciencespo.fr"),
+	person("Felix", "Knau", role = "aut", email = "felix.knau@sciencespo.fr"),
+	person("Mélitine", "Malezieux", role = "aut", email = "melitine.malezieux@sciencespo.fr"),	
+	person("Doulo", "Sow", role = "aut", email = "doulo.sow@ensae.fr"),
+	person("Shuo", "Zhang", role = "aut", email = "shuo_zhang@ucsb.edu"),
       	person("Clément", "de Chaisemartin", role = "aut", email = "clement.dechaisemartin@sciencespo.fr"))
-Maintainer: ERC REALLYCREDIBLE RA Team <chaisemartin.packages@gmail.com>
+Maintainer: Diego Ciccia <diego.ciccia@sciencespo.fr>
 Description: 
     Estimates the weights and measure of robustness to treatment effect heterogeneity attached to two-way fixed effects regressions.
     Clément de Chaisemartin, Xavier D'Haultfœuille (2020) <DOI: 10.1257/aer.20181169>.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Depends: R(>= 3.4.0)
-Imports: dplyr, fixest, stringr, stats, estimatr, huxtable, rlang
-Suggests: wooldridge
+Imports: conflicted, dplyr, huxtable, fixest, stringr, stats, estimatr,
+        rlang, utils, haven
 NeedsCompilation: no
-Packaged: 
-Author: Shuo Zhang [aut, cre],
-	Diego Ciccia [aut, cre],
-	Felix Knau [aut, cre],
-	Mélitine Malezieux [aut, cre],
-	Doulo Sow [aut, cre],
+Author: Diego Ciccia [aut, cre],
+	Felix Knau [aut],
+	Mélitine Malezieux [aut],
+	Doulo Sow [aut],
+	Shuo Zhang [aut],
   	Clément de Chaisemartin [aut]
-Repository: CRAN
-Date/Publication:
-RoxygenNote: 7.2.3
+Packaged: 2023-12-04 13:46:56 UTC; 39380
