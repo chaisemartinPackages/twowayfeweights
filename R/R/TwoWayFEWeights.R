@@ -1,10 +1,11 @@
 #Install and Import all the packages
-packages <- c("data.table", "dplyr", "logr", "estimatr", "huxtable", "magrittr", "fixest")
+
+packages <- c("haven","conflicted", "data.table", "dplyr", "logr", "estimatr", "huxtable", "magrittr", "fixest")
 
 ds_libraries <- function(packages){
   for(package in packages){
     if(!require(package, character.only = TRUE)){
-      install.packages(package, dependencies = TRUE)
+      install.packages(package, dependencies = TRUE,repos = "http://cran.us.r-project.org")
     }
     #Load package
     library(package, character.only = TRUE)
@@ -12,9 +13,14 @@ ds_libraries <- function(packages){
 }
 ds_libraries(packages)
 
+conflict_prefer("filter", "dplyr")
+conflict_prefer("add_rownames", "dplyr")
+conflict_prefer("lag", "dplyr")
+
 options(dplyr.summarise.inform = FALSE)
 suppressWarnings({
 setFixest_notes(FALSE)
+
 
 printf <- function(...)print(sprintf(...))
 fn_ctrl_rename <- function(x) { paste("ctrl", x, sep="_") }
@@ -32,7 +38,7 @@ twowayfeweights_rename_var <- function(df, Y, G, T, D, D0, controls, treatments,
   if (length(random_weights) > 0) {
     random_weight_rename <- get_random_weight_rename(random_weights)
     #random_weight_df <- df[random_weights]
-    random_weight_df <- df %>% select(all_of(random_weights))
+    random_weight_df <- df %>% dplyr::select(all_of(random_weights))
     colnames(random_weight_df) <- random_weight_rename
     
   }
@@ -46,7 +52,7 @@ twowayfeweights_rename_var <- function(df, Y, G, T, D, D0, controls, treatments,
     new_names = c(new_names, "D0")
   }
   
-  df <- data.frame(df) %>% select_at(vars(original_names))
+  df <- data.frame(df) %>% dplyr::select_at(dplyr::vars(original_names))
   colnames(df) <- new_names
   
   if (length(random_weights) > 0) {
@@ -59,16 +65,16 @@ twowayfeweights_rename_var <- function(df, Y, G, T, D, D0, controls, treatments,
 twowayfeweights_normalize_var <- function(df, varname){
   var = sym(varname)
   sdf <- df %>%
-    group_by(.data$G, .data$T) %>%
-    summarise(tmp_mean_gt = mean(!!var), tmp_sd_gt = sd(!!var))
+    dplyr::group_by(.data$G, .data$T) %>%
+    dplyr::summarise(tmp_mean_gt = mean(!!var), tmp_sd_gt = sd(!!var))
   
   tmp_sd_gt_sum = sum(sdf$tmp_sd_gt, na.rm=TRUE)
   if (tmp_sd_gt_sum > 0) {
     df <- df %>% 
-      left_join(sdf, by=c("T", "G")) %>%
-      mutate(!!var := .data$tmp_mean_gt) %>%
-      select(-.data$tmp_mean_gt) %>%
-      select(-.data$tmp_sd_gt)
+      dplyr::left_join(sdf, by=c("T", "G")) %>%
+      dplyr::mutate(!!var := .data$tmp_mean_gt) %>%
+      dplyr::select(-.data$tmp_mean_gt) %>%
+      dplyr::select(-.data$tmp_sd_gt)
   }
   
   list(retcode = (tmp_sd_gt_sum > 0), df = df)
@@ -117,7 +123,7 @@ twowayfeweights_transform <- function(df, controls, weights, treatments) {
   
   df$Tfactor <- factor(df$T)
   TfactorLevels <- length(levels(df$Tfactor))
-  df <- df %>% mutate(TFactorNum = as.numeric(factor(.data$Tfactor, labels = seq(1:TfactorLevels))))
+  df <- df %>% dplyr::mutate(TFactorNum = as.numeric(factor(.data$Tfactor, labels = seq(1:TfactorLevels))))
   
   df
 }
@@ -126,22 +132,22 @@ twowayfeweights_filter <- function(df, Y, G, T, D, D0, cmd_type, controls, treat
   # Remove rows with NA values
   if (cmd_type != "fdTR") {
     df <- df %>%
-      mutate(tag = rowSums(across(.cols = c(Y, G, T, D, controls, treatments), .fns = is.na))) %>%
+      dplyr::mutate(tag = rowSums(dplyr::across(.cols = c(Y, G, T, D, controls, treatments), .fns = is.na))) %>%
       dplyr::filter(.data$tag == 0) %>%
-      select(-.data$tag)
+      dplyr::select(-.data$tag)
   } else {
     df <- df %>%
-      mutate(tag1 = rowSums(across(.cols = c(D, T, Y), .fns = is.na))) %>%
-      mutate(tag2 = rowSums(across(.cols = c(D0), .fns = is.na))) %>%
+      dplyr::mutate(tag1 = rowSums(dplyr::across(.cols = c(D, T, Y), .fns = is.na))) %>%
+      dplyr::mutate(tag2 = rowSums(dplyr::across(.cols = c(D0), .fns = is.na))) %>%
       dplyr::filter(.data$tag1 == 0 | .data$tag2 == 0)
     
     if (length(controls) > 0) {
       df <- df %>%
-        mutate(tag3 = rowSums(across(.cols = controls, .fns = is.na))) %>%
+        dplyr::mutate(tag3 = rowSums(dplyr::across(.cols = controls, .fns = is.na))) %>%
         dplyr::filter(.data$tag1 == 1 | .data$tag3 == 0) %>%
-        select(-.data$tag3)
+        dplyr::select(-.data$tag3)
     }
-    df <- df %>% select(-.data$tag1, -.data$tag2)
+    df <- df %>% dplyr::select(-.data$tag1, -.data$tag2)
   }
   df
 }
@@ -149,11 +155,11 @@ twowayfeweights_filter <- function(df, Y, G, T, D, D0, cmd_type, controls, treat
 twowayfeweights_calculate_fetr <- function(df, controls) {
   mean_D <- weighted.mean(df$D, df$weights, na.rm = TRUE)
   obs <- sum(df$weights)
-  gdf <- df %>% group_by(G, T) %>% summarise(P_gt = sum(weights)) #removed .data$
+  gdf <- df %>% dplyr::group_by(.data$G, .data$T) %>% dplyr::summarise(P_gt = sum(weights))
   df <- df %>% 
-    left_join(gdf, by=c("T", "G")) %>% 
-    mutate(P_gt = .data$P_gt / obs) %>% 
-    mutate(nat_weight = .data$P_gt * .data$D / mean_D)
+    dplyr::left_join(gdf, by=c("T", "G")) %>% 
+    dplyr::mutate(P_gt = .data$P_gt / obs) %>% 
+    dplyr::mutate(nat_weight = .data$P_gt * .data$D / mean_D)
   
   if (length(controls) == 0) {
     formula = "D ~ 1"
@@ -168,9 +174,9 @@ twowayfeweights_calculate_fetr <- function(df, controls) {
   denom_W <- weighted.mean(df$eps_1_E_D_gt, df$weights, na.rm = TRUE)
   
   df <- df %>% 
-    mutate(W = .data$eps_1 * mean_D / denom_W) %>% 
-    mutate(weight_result = .data$W * .data$nat_weight) %>%
-    select(-.data$eps_1, -.data$P_gt)
+    dplyr::mutate(W = .data$eps_1 * mean_D / denom_W) %>% 
+    dplyr::mutate(weight_result = .data$W * .data$nat_weight) %>%
+    dplyr::select(-.data$eps_1, -.data$P_gt)
   
   if (length(controls) == 0) {
     formula = "Y ~ D"
@@ -188,8 +194,8 @@ twowayfeweights_calculate_fetr <- function(df, controls) {
   # 	drop if group_period_unit==0
   # 	drop group_period_unit
   df <- df %>%
-    group_by(.data$G, .data$Tfactor) %>%
-    dplyr::filter(row_number(.data$D) == 1)
+    dplyr::group_by(.data$G, .data$Tfactor) %>%
+    dplyr::filter(dplyr::row_number(.data$D) == 1)
   
   list(df = df, beta = beta)
 }
@@ -197,11 +203,11 @@ twowayfeweights_calculate_fetr <- function(df, controls) {
 twowayfeweights_calculate_fdtr <- function(df, controls) {
   mean_D0 <- weighted.mean(df$D0, df$weights, na.rm = TRUE)
   obs <- sum(df$weights)
-  gdf <- df %>% group_by(.data$G, .data$T) %>% summarise(P_gt = sum(.data$weights))
+  gdf <- df %>% dplyr::group_by(.data$G, .data$T) %>% dplyr::summarise(P_gt = sum(.data$weights))
   df <- df %>% 
-    left_join(gdf, by=c("G", "T")) %>% 
-    mutate(P_gt = .data$P_gt / obs) %>% 
-    mutate(nat_weight = .data$P_gt * .data$D0 / mean_D0)
+    dplyr::left_join(gdf, by=c("G", "T")) %>% 
+    dplyr::mutate(P_gt = .data$P_gt / obs) %>% 
+    dplyr::mutate(nat_weight = .data$P_gt * .data$D0 / mean_D0)
   
   if (length(controls) == 0) {
     formula = "D ~ 1"
@@ -214,7 +220,7 @@ twowayfeweights_calculate_fdtr <- function(df, controls) {
   df$eps_2 <- residuals(denom.lm, na.rm = FALSE)
   # df$eps_2 <- df$D - predict(denom.lm, df)
   
-  df <- df %>% mutate(eps_2 = ifelse(is.na(.data$eps_2), 0, .data$eps_2))
+  df <- df %>% dplyr::mutate(eps_2 = ifelse(is.na(.data$eps_2), 0, .data$eps_2))
   
 
   if (length(controls) == 0) {
@@ -228,27 +234,27 @@ twowayfeweights_calculate_fdtr <- function(df, controls) {
   beta <- as.numeric(coef(beta.lm)["D"])
   
   df <- df %>% 
-    arrange(.data$G, .data$TFactorNum) %>%
-    group_by(.data$G) %>% 
-    mutate(w_tilde_2 = ifelse(.data$TFactorNum + 1 == lead(.data$TFactorNum), .data$eps_2 - lead(.data$eps_2) * (lead(.data$P_gt) / .data$P_gt), NA)) %>%
-    mutate(w_tilde_2 = ifelse(is.na(.data$w_tilde_2) | is.infinite(.data$w_tilde_2), .data$eps_2, .data$w_tilde_2)) %>%
-    mutate(w_tilde_2_E_D_gt = .data$w_tilde_2 * .data$D0)
+    dplyr::arrange(.data$G, .data$TFactorNum) %>%
+    dplyr::group_by(.data$G) %>% 
+    dplyr::mutate(w_tilde_2 = ifelse(.data$TFactorNum + 1 == dplyr::lead(.data$TFactorNum), .data$eps_2 - dplyr::lead(.data$eps_2) * (dplyr::lead(.data$P_gt) / .data$P_gt), NA)) %>%
+    dplyr::mutate(w_tilde_2 = ifelse(is.na(.data$w_tilde_2) | is.infinite(.data$w_tilde_2), .data$eps_2, .data$w_tilde_2)) %>%
+    dplyr::mutate(w_tilde_2_E_D_gt = .data$w_tilde_2 * .data$D0)
   
   denom_W <- weighted.mean(df$w_tilde_2_E_D_gt, df$P_gt, na.rm = TRUE)
   df <- df %>% 
-    mutate(W = .data$w_tilde_2 * mean_D0 / denom_W) %>% 
-    mutate(weight_result = .data$W * .data$nat_weight)
+    dplyr::mutate(W = .data$w_tilde_2 * mean_D0 / denom_W) %>% 
+    dplyr::mutate(weight_result = .data$W * .data$nat_weight)
   df <- df %>%
-    select(-.data$eps_2, -.data$P_gt, -.data$w_tilde_2, -.data$w_tilde_2_E_D_gt)
+    dplyr::select(-.data$eps_2, -.data$P_gt, -.data$w_tilde_2, -.data$w_tilde_2_E_D_gt)
   list(df = df, beta = beta)
 }
 
 twowayfeweights_calculate_fes <- function(df, controls) {
   obs <- sum(df$weights)
-  gdf <- df %>% group_by(.data$G, .data$T) %>% summarise(P_gt = sum(.data$weights))
+  gdf <- df %>% dplyr::group_by(.data$G, .data$T) %>% dplyr::summarise(P_gt = sum(.data$weights))
   df <- df %>% 
-    left_join(gdf, by=c("T", "G")) %>% 
-    mutate(P_gt = .data$P_gt / obs)
+    dplyr::left_join(gdf, by=c("T", "G")) %>% 
+    dplyr::mutate(P_gt = .data$P_gt / obs)
   
   if (length(controls) == 0) {
     formula = "D ~ 1"
@@ -262,12 +268,12 @@ twowayfeweights_calculate_fes <- function(df, controls) {
   # df$eps_1 <- df$D - predict(denom.lm, df)
   
   df <- df %>% 
-    mutate(eps_1_weight = .data$eps_1 * .data$weights) %>%
-    arrange(.data$G, .data$Tfactor) %>%
-    group_by(.data$G) %>%
-    mutate(E_eps_1_g_ge_aux = rev(cumsum(rev(.data$eps_1_weight)))) %>%
-    mutate(weights_aux = rev(cumsum(rev(.data$weights)))) %>%
-    mutate(E_eps_1_g_ge = .data$E_eps_1_g_ge_aux / .data$weights_aux)
+    dplyr::mutate(eps_1_weight = .data$eps_1 * .data$weights) %>%
+    dplyr::arrange(.data$G, .data$Tfactor) %>%
+    dplyr::group_by(.data$G) %>%
+    dplyr::mutate(E_eps_1_g_ge_aux = rev(cumsum(rev(.data$eps_1_weight)))) %>%
+    dplyr::mutate(weights_aux = rev(cumsum(rev(.data$weights)))) %>%
+    dplyr::mutate(E_eps_1_g_ge = .data$E_eps_1_g_ge_aux / .data$weights_aux)
   
   if (length(controls) == 0) {
     formula = "Y ~ D"
@@ -289,36 +295,36 @@ twowayfeweights_calculate_fes <- function(df, controls) {
   #   summarize(.data$P_gt, .data$nat_weight)
   
   df <- df %>% 
-    arrange(.data$G, .data$Tfactor) %>%
-    group_by(.data$G) %>% 
-    mutate(delta_D = ifelse(.data$TFactorNum - 1 == lag(.data$TFactorNum), .data$D - lag(.data$D), NA)) %>%
+    dplyr::arrange(.data$G, .data$Tfactor) %>%
+    dplyr::group_by(.data$G) %>% 
+    dplyr::mutate(delta_D = ifelse(.data$TFactorNum - 1 == lag(.data$TFactorNum), .data$D - lag(.data$D), NA)) %>%
     dplyr::filter(!is.na(.data$delta_D)) %>%
-    mutate(abs_delta_D = abs(.data$delta_D)) %>%
-    mutate(s_gt = case_when(.data$delta_D > 0 ~ 1,
+    dplyr::mutate(abs_delta_D = abs(.data$delta_D)) %>%
+    dplyr::mutate(s_gt = dplyr::case_when(.data$delta_D > 0 ~ 1,
                             .data$delta_D < 0 ~ -1,
                             TRUE ~ 0)) %>%
-    mutate(nat_weight = .data$P_gt * .data$abs_delta_D)
+    dplyr::mutate(nat_weight = .data$P_gt * .data$abs_delta_D)
   
   P_S = sum(df$nat_weight, na.rm = TRUE)
   df <- df %>% 
-    mutate(nat_weight = .data$nat_weight / P_S) %>%
-    mutate(om_tilde_1 = .data$s_gt * .data$E_eps_1_g_ge / .data$P_gt)
+    dplyr::mutate(nat_weight = .data$nat_weight / P_S) %>%
+    dplyr::mutate(om_tilde_1 = .data$s_gt * .data$E_eps_1_g_ge / .data$P_gt)
   
   denom_W = weighted.mean(df$om_tilde_1, df$nat_weight, na.rm = TRUE)
   df <- df %>%
-    mutate(W = .data$om_tilde_1 / denom_W) %>%
-    mutate(weight_result = .data$W * .data$nat_weight) %>%
-    select(-.data$eps_1, -.data$P_gt, -.data$om_tilde_1, -.data$E_eps_1_g_ge,
+    dplyr::mutate(W = .data$om_tilde_1 / denom_W) %>%
+    dplyr::mutate(weight_result = .data$W * .data$nat_weight) %>%
+    dplyr::select(-.data$eps_1, -.data$P_gt, -.data$om_tilde_1, -.data$E_eps_1_g_ge,
            -.data$E_eps_1_g_ge_aux, -.data$weights_aux, -.data$abs_delta_D, -.data$delta_D)
   list(df = df, beta = beta)
 }
 
 twowayfeweights_calculate_fds <- function(df, controls) {
   obs <- sum(df$weights)
-  gdf <- df %>% group_by(.data$G, .data$T) %>% summarise(P_gt = sum(.data$weights))
+  gdf <- df %>% dplyr::group_by(.data$G, .data$T) %>% dplyr::summarise(P_gt = sum(.data$weights))
   df <- df %>% 
-    left_join(gdf, by=c("T", "G")) %>% 
-    mutate(P_gt = .data$P_gt / obs)
+    dplyr::left_join(gdf, by=c("T", "G")) %>% 
+    dplyr::mutate(P_gt = .data$P_gt / obs)
   
   if (length(controls) == 0) {
     formula = "D ~ 1"
@@ -351,21 +357,21 @@ twowayfeweights_calculate_fds <- function(df, controls) {
   #   summarize(.data$P_gt, .data$nat_weight)
   
   df <- df %>%
-    mutate(s_gt = case_when(.data$D > 0 ~ 1,
+    dplyr::mutate(s_gt = dplyr::case_when(.data$D > 0 ~ 1,
                             .data$D < 0 ~ -1,
                             TRUE ~ 0)) %>%
-    mutate(abs_delta_D = abs(.data$D)) %>%
-    mutate(nat_weight = .data$P_gt * .data$abs_delta_D)
+    dplyr::mutate(abs_delta_D = abs(.data$D)) %>%
+    dplyr::mutate(nat_weight = .data$P_gt * .data$abs_delta_D)
   
   P_S = sum(df$nat_weight)
   df <- df %>% 
-    mutate(nat_weight = .data$nat_weight / P_S) %>%
-    mutate(W = .data$s_gt * .data$eps_2)
+    dplyr::mutate(nat_weight = .data$nat_weight / P_S) %>%
+    dplyr::mutate(W = .data$s_gt * .data$eps_2)
   denom_W = weighted.mean(df$W, df$nat_weight, na.rm = TRUE)
   df <- df %>% 
-    mutate(W = .data$W / denom_W) %>% 
-    mutate(weight_result = .data$W * .data$nat_weight) %>%
-    select(-.data$eps_2, -.data$P_gt, -.data$abs_delta_D)
+    dplyr::mutate(W = .data$W / denom_W) %>% 
+    dplyr::mutate(weight_result = .data$W * .data$nat_weight) %>%
+    dplyr::select(-.data$eps_2, -.data$P_gt, -.data$abs_delta_D)
   
   list(df = df, beta = beta)
 }
@@ -390,10 +396,11 @@ twowayfeweights_test_random_weights <- function(df, random_weights) {
   mat <- data.frame(matrix(nrow = 0, ncol = 4))
   colnames(mat) <- c("Coef", "SE", "t-stat", "Correlation")
   df_filtered <- df %>% dplyr::filter(is.finite(.data$W))
+  df_filtered_sub <- subset(df_filtered, df_filtered$nat_weight != 0) #Modif. Diego: added extra line to solve note in R CMD Check
  
   for (v in random_weights) {
     formula <- sprintf("%s ~ W", v)
-    rw.lm = lm_robust(formula =as.formula(formula), data = subset(df_filtered, nat_weight != 0), weights = nat_weight, clusters = G, se_type = "stata")
+    rw.lm = lm_robust(formula =as.formula(formula), data = df_filtered_sub, weights = df_filtered_sub$nat_weight, clusters = df_filtered_sub$G, se_type = "stata")
     beta <- rw.lm$coefficients[["W"]]
     se <- rw.lm$std.error[["W"]]
     r2 <- rw.lm$r.squared
@@ -418,8 +425,8 @@ twowayfeweights_result <- function(df, beta, random_weights) {
   sensibility <- abs(beta) / W_sd
   
   df_result <- df %>% 
-    select(.data$T, .data$G, .data$weight_result) %>% 
-    rename(weight = .data$weight_result)
+    dplyr::select(.data$T, .data$G, .data$weight_result) %>% 
+    dplyr::rename(weight = .data$weight_result)
   
   ret$df_result = df_result
   ret$beta = beta
@@ -431,8 +438,8 @@ twowayfeweights_result <- function(df, beta, random_weights) {
   if (ret$sum_minus < 0) {
     df_sens <- df %>%
       dplyr::filter(.data$weight_result != 0) %>%
-      arrange(desc(.data$W)) %>% 
-      mutate(P_k = 0, S_k = 0, T_k = 0)
+      dplyr::arrange(desc(.data$W)) %>% 
+      dplyr::mutate(P_k = 0, S_k = 0, T_k = 0)
     
     # Modif. Diego: Replaced the previous two loops with build-in routines
     N = nrow(df_sens)
@@ -443,14 +450,14 @@ twowayfeweights_result <- function(df, beta, random_weights) {
     df_sens$T_k <- cumsum(df_sens$Wsq) 
     df_sens <- df_sens[order(-df_sens$W, df_sens$G, df_sens$T),]
     df_sens <- df_sens %>% 
-      mutate(sens_measure2 = abs(beta) / sqrt(.data$T_k + .data$S_k^2 / (1 - .data$P_k))) %>%
-      mutate(indicator = as.numeric(.data$W < - .data$S_k / (1 - .data$P_k)))
+      dplyr::mutate(sens_measure2 = abs(beta) / sqrt(.data$T_k + .data$S_k^2 / (1 - .data$P_k))) %>%
+      dplyr::mutate(indicator = as.numeric(.data$W < - .data$S_k / (1 - .data$P_k)))
     df_sens$indicator[1] = 0
     df_sens <- df_sens %>%
-      mutate(indicator_l = lag(indicator, default = -1))
+      dplyr::mutate(indicator_l = lag(.data$indicator, default = -1))
     df_sens <- df_sens %>%
-      rowwise() %>%
-      mutate(indicator=max(indicator, indicator_l))
+      dplyr::rowwise() %>%
+      dplyr::mutate(indicator=max(.data$indicator, .data$indicator_l))
     total_indicator <- sum(df_sens$indicator)
     sensibility2 <- df_sens$sens_measure2[N - total_indicator + 1]
     ret$sensibility2 = sensibility2
@@ -460,10 +467,10 @@ twowayfeweights_result <- function(df, beta, random_weights) {
 }
 
 twowayfeweights_print_results <- function(cmd_type, r, d, summary_measures, twfe, random_weights) {
-  treat = case_when(cmd_type == "feTR" || cmd_type == "fdTR" ~ "ATT",
+  treat = dplyr::case_when(cmd_type == "feTR" || cmd_type == "fdTR" ~ "ATT",
                     cmd_type == "feS" || cmd_type == "fdS" ~ "LATE", 
                     TRUE ~ "BLANK")
-  assumption = case_when(cmd_type == "feTR" || cmd_type == "fdTR" ~ "Under the common trends assumption",
+  assumption = dplyr::case_when(cmd_type == "feTR" || cmd_type == "fdTR" ~ "Under the common trends assumption",
                          cmd_type == "feS" || cmd_type == "fdS" ~ "Under the common trends, treatment monotonicity, and if groups' treatment effect does not change over time", 
                          TRUE ~ "BLANK")
   
@@ -478,7 +485,7 @@ twowayfeweights_print_results <- function(cmd_type, r, d, summary_measures, twfe
   print(paste(rep("-",68), collapse= ""))
   
   ##Doulo
-  print_out <- hux(c(paste0("Treat. var: ", d),"Positive weights", "Negative weights", "Total")
+  print_out <- huxtable::hux(c(paste0("Treat. var: ", d),"Positive weights", "Negative weights", "Total")
                 ,c(paste0(treat, "s"), round(r$nr_plus, 2), round(r$nr_minus, 2), tot_weights),
                 c(paste0("\U03A3", " weights"), round(r$sum_plus, 4), round(r$sum_minus, 4), tot_sums),
                 add_colnames = FALSE
@@ -488,19 +495,19 @@ twowayfeweights_print_results <- function(cmd_type, r, d, summary_measures, twfe
   environment_names <- c("sum_neg_w", "lb_se_te", "beta")
   
   print_out = print_out %>% 
-    set_all_padding(4) %>% 
-    set_outer_padding(0) %>% 
+    huxtable::set_all_padding(4) %>% 
+    huxtable::set_outer_padding(0) %>% 
     #set_number_format(2) %>% 
-    set_bottom_border(row = 1, col = everywhere) %>% 
-    set_top_border(row = 1, col = everywhere) %>% 
-    set_bottom_border(row = 3, col = everywhere) %>% 
-    set_width(2) %>% 
-    set_align(everywhere, 2:3, "center") %>% 
-    set_bold(1, everywhere) %>% 
-    set_bottom_border(row = 4, col = everywhere)
+    huxtable::set_bottom_border(row = 1, col = huxtable::everywhere) %>% 
+    huxtable::set_top_border(row = 1, col = huxtable::everywhere) %>% 
+    huxtable::set_bottom_border(row = 3, col = huxtable::everywhere) %>% 
+    huxtable::set_width(2) %>% 
+    huxtable::set_align(huxtable::everywhere, 2:3, "center") %>% 
+    huxtable::set_bold(1, huxtable::everywhere) %>% 
+    huxtable::set_bottom_border(row = 4, col = huxtable::everywhere)
   
   colnames(print_out) = NULL
-  print_screen(print_out) 
+  huxtable::print_screen(print_out) 
   
   ###If we want to add the option export_excel
   # export_path  = "export_path.xlsx"
@@ -541,11 +548,11 @@ twowayfeweights_print_results <- function(cmd_type, r, d, summary_measures, twfe
 twowayfeweights_calculate_fetr_other_treatment <- function(df, controls, treatments) {
   mean_D <- weighted.mean(df$D, df$weights, na.rm = TRUE)
   obs <- sum(df$weights)
-  gdf <- df %>% group_by(.data$G, .data$T) %>% summarise(P_gt = sum(.data$weights))
+  gdf <- df %>% dplyr::group_by(.data$G, .data$T) %>% dplyr::summarise(P_gt = sum(.data$weights))
   df <- df %>% 
-    left_join(gdf, by=c("T", "G")) %>% 
-    mutate(P_gt = .data$P_gt / obs) %>% 
-    mutate(nat_weight = .data$P_gt * .data$D / mean_D)
+    dplyr::left_join(gdf, by=c("T", "G")) %>% 
+    dplyr::mutate(P_gt = .data$P_gt / obs) %>% 
+    dplyr::mutate(nat_weight = .data$P_gt * .data$D / mean_D)
   
   vars = c(controls, treatments)
   formula = paste(vars, collapse = " + ")
@@ -557,15 +564,15 @@ twowayfeweights_calculate_fetr_other_treatment <- function(df, controls, treatme
   denom_W <- mean(df$eps_1_E_D_gt, na.rm = TRUE)
   
   df <- df %>% 
-    mutate(W = .data$eps_1 * mean_D / denom_W) %>% 
-    mutate(weight_result = .data$W * .data$nat_weight)
+    dplyr::mutate(W = .data$eps_1 * mean_D / denom_W) %>% 
+    dplyr::mutate(weight_result = .data$W * .data$nat_weight)
   
   for (treatment in treatments) {
     varname = fn_treatment_weight_rename(treatment)
-    df <- df %>% mutate(!!sym(varname) := .data$W * .data$P_gt * !!sym(treatment) / mean_D)
+    df <- df %>% dplyr::mutate(!!sym(varname) := .data$W * .data$P_gt * !!sym(treatment) / mean_D)
   }
   
-  df <- df %>% select(-.data$eps_1, -.data$P_gt)
+  df <- df %>% dplyr::select(-.data$eps_1, -.data$P_gt)
   
   formula = paste(vars, collapse = " + ")
   formula = paste("Y ~ D + ", formula, sep = "")
@@ -591,8 +598,8 @@ twowayfeweights_result_other_treatment <- function(df, treatments, beta, random_
     ret[[treatment]] <- ret2
   }
   df_result <- df %>% 
-    select_at(vars(columns)) %>% 
-    rename(weight = .data$weight_result)
+    dplyr::select_at(dplyr::vars(columns)) %>% 
+    dplyr::rename(weight = .data$weight_result)
   
   ret$beta = beta
   ret[["df_result"]] <- df_result
@@ -613,7 +620,7 @@ twowayfeweights_print_result_other_treatment <- function(r, treatments, d, twfe,
   print(paste(rep("-",75), collapse= ""))
   
   ##Doulo
-  print_out <- hux(c(paste0("Treat. var: ", d),"Positive weights", "Negative weights", "Total")
+  print_out <- huxtable::hux(c(paste0("Treat. var: ", d),"Positive weights", "Negative weights", "Total")
                 ,c(paste0("ATT", "s"), round(r$nr_plus, 2), round(r$nr_minus, 2), tot_weights),
                 c(paste0("\U03A3", " weights"), round(r$sum_plus, 4), round(r$sum_minus, 4), tot_sums),
                 add_colnames = FALSE
@@ -622,19 +629,19 @@ twowayfeweights_print_result_other_treatment <- function(r, treatments, d, twfe,
   environment_names <- c("sum_neg_w", "beta")
   
   print_out = print_out %>% 
-    set_all_padding(4) %>% 
-    set_outer_padding(0) %>% 
+    huxtable::set_all_padding(4) %>% 
+    huxtable::set_outer_padding(0) %>% 
     #set_number_format(2) %>% 
-    set_bottom_border(row = 1, col = everywhere) %>% 
-    set_top_border(row = 1, col = everywhere) %>% 
-    set_bottom_border(row = 3, col = everywhere) %>% 
-    set_width(2) %>% 
-    set_align(everywhere, 2:3, "center") %>% 
-    set_bold(1, everywhere) %>% 
-    set_bottom_border(row = 4, col = everywhere)
+    huxtable::set_bottom_border(row = 1, col = huxtable::everywhere) %>% 
+    huxtable::set_top_border(row = 1, col = huxtable::everywhere) %>% 
+    huxtable::set_bottom_border(row = 3, col = huxtable::everywhere) %>% 
+    huxtable::set_width(2) %>% 
+    huxtable::set_align(huxtable::everywhere, 2:3, "center") %>% 
+    huxtable::set_bold(1, huxtable::everywhere) %>% 
+    huxtable::set_bottom_border(row = 4, col = huxtable::everywhere)
   
   colnames(print_out) = NULL
-  print_screen(print_out) 
+  huxtable::print_screen(print_out) 
   
   ##
   
@@ -652,7 +659,7 @@ twowayfeweights_print_result_other_treatment <- function(r, treatments, d, twfe,
     print(paste(rep("-",108), collapse= ""))
     
     ##Doulo
-    print_out <- hux(c(paste0("Other treat.: ", ot_treat),"Positive weights", "Negative weights", "Total")
+    print_out <- huxtable::hux(c(paste0("Other treat.: ", ot_treat),"Positive weights", "Negative weights", "Total")
                   ,c(paste0("ATT", "s"), round(r2$nr_plus, 2), round(r2$nr_minus, 2), tot_weights),
                   c(paste0("\U03A3", " weights"), round(r2$sum_plus, 4), round(r2$sum_minus, 4), tot_sums),
                   add_colnames = FALSE
@@ -663,19 +670,19 @@ twowayfeweights_print_result_other_treatment <- function(r, treatments, d, twfe,
     environment_names <- c(environment_names, oth_title)
 
     print_out = print_out %>% 
-      set_all_padding(4) %>% 
-      set_outer_padding(0) %>% 
+      huxtable::set_all_padding(4) %>% 
+      huxtable::set_outer_padding(0) %>% 
       #set_number_format(2) %>% 
-      set_bottom_border(row = 1, col = everywhere) %>% 
-      set_top_border(row = 1, col = everywhere) %>% 
-      set_bottom_border(row = 3, col = everywhere) %>% 
-      set_width(2) %>% 
-      set_align(everywhere, 2:3, "center") %>% 
-      set_bold(1, everywhere) %>% 
-      set_bottom_border(row = 4, col = everywhere)
+      huxtable::set_bottom_border(row = 1, col = huxtable::everywhere) %>% 
+      huxtable::set_top_border(row = 1, col = huxtable::everywhere) %>% 
+      huxtable::set_bottom_border(row = 3, col = huxtable::everywhere) %>% 
+      huxtable::set_width(2) %>% 
+      huxtable::set_align(huxtable::everywhere, 2:3, "center") %>% 
+      huxtable::set_bold(1, huxtable::everywhere) %>% 
+      huxtable::set_bottom_border(row = 4, col = huxtable::everywhere)
     
     colnames(print_out) = NULL
-    print_screen(print_out) 
+    huxtable::print_screen(print_out) 
   }
   
   if (length(random_weights) > 0) {
@@ -709,16 +716,11 @@ twowayfeweights_print_result_other_treatment <- function(r, treatments, d, twfe,
 #' @param other_treatments the list of other treatment variables to include in the regression other than D
 #' @param test_random_weights weights when this option is specified, the command estimates the correlation
 #'                            between each variable in varlist and the weights
-#' @covariance
-#' @average_effect
-#' @param parallel parallelly perform bootstrap
 #'
 #' @return twowayfeweights returns data frame that contains the following columns
 #'         T: time variable
 #'         G: group variable
 #'         weight: the result of the weight
-#'
-#' @export
 
 twowayfeweights <- function(df, Y, G, T, D, type, D0 = NULL, summary_measures = NULL, controls = c(), weights = NULL, other_treatments = c(), test_random_weights = c(), path = NULL) {
   if (!is.null(D0) && type != "fdTR") {
