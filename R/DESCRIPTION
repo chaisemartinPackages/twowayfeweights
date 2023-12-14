@@ -17,8 +17,18 @@ Description:
 License: MIT + file LICENSE
 Encoding: UTF-8
 Depends: R(>= 3.4.0)
-Imports: conflicted, dplyr, huxtable, fixest, stringr, stats, estimatr,
-        rlang, utils, haven
+Imports:
+  conflicted,
+  dplyr,
+  huxtable,
+  fixest,
+  stringr,
+  stats,
+  estimatr,
+  rlang,
+  utils
+Suggests:
+  haven
 NeedsCompilation: no
 Author: Diego Ciccia [aut, cre],
 	Felix Knau [aut],
