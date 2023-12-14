@@ -25,7 +25,7 @@ twowayfeweights Y G T D [D0], type(string)
 ```
 
 R:
-```s
+```r
 twowayfeweights(df, Y, G, T, D, D0 = NULL, type, summary_measures = NULL,
 controls = c(), weights = NULL, other_treatments = c(), test_random_weights = c(), path = NULL)
 ```
@@ -85,25 +85,40 @@ twowayfeweights diff_lwage nr year diff_union union, type(fdTR) test_random_weig
 
 ### R
 Run the following line to download the dataset in your local working directory and load it to your R environment:
-```s
+
+```r
 library(TwoWayFEWeights)
-#install.packages("haven")
-library(haven)
-url <- "https://raw.githubusercontent.com/chaisemartinPackages/twowayfeweights/main/wagepan_twfeweights.dta"
-cwd <- getwd()
-file <- paste(cwd, "/wagepan_twfeweights.dta", sep = "")
-download.file(url, file , mode = "wb")
-wagepan <-  read_dta(file)
+
+## We need the haven package to read in the dta. file in this example
+# install.packages("haven")
+
+url = "https://raw.githubusercontent.com/chaisemartinPackages/twowayfeweights/main/wagepan_twfeweights.dta"
+wagepan =  haven::read_dta(url)
 ```
 
 The next line estimates the weights from a TWFE regression of log wage (Y) on union status (D), individual worker (G) and year (T) fixed effects:
-```s
-twowayfeweights(wagepan, "lwage", "nr", "year", "union", type = "feTR", summary_measures = TRUE, test_random_weights = c("educ"))
+
+```r
+est = twowayfeweights(
+  wagepan,                        # data
+  "lwage", "nr", "year", "union", # Required Y, G, T, and D args
+  type                = "feTR",   # start of optional args...
+  summary_measures    = TRUE,
+  test_random_weights = "educ"
+)
 ```
 
 The next line performs the same exercise using first differences of outcome and treatment:
-```s
-twowayfeweights(wagepan, "diff_lwage", "nr", "year", "diff_union", type = "fdTR", D0 = "union", summary_measures = TRUE, test_random_weights = c("educ"))
+
+```
+est2 = twowayfeweights(
+  wagepan,
+  "diff_lwage", "nr", "year", "diff_union",
+  type                = "fdTR",
+  D0                  = "union",
+  summary_measures    = TRUE,
+  test_random_weights = "educ"
+)
 ```
 
 #### Warning
