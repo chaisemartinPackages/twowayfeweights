@@ -193,11 +193,14 @@ twowayfeweights_test_random_weights <- function(df, random_weights) {
  
   for (v in random_weights) {
     formula <- sprintf("%s ~ W", v)
-    rw.lm = estimatr::lm_robust(formula =as.formula(formula), data = df_filtered_sub, weights = df_filtered_sub$nat_weight, clusters = df_filtered_sub$G, se_type = "stata")
-    beta <- rw.lm$coefficients[["W"]]
-    se <- rw.lm$std.error[["W"]]
-    r2 <- rw.lm$r.squared
-    # rw.lm = fixest::feols(fml = as.formula(formula), data = df_filtered_sub, weights = df_filtered_sub$nat_weight, vcov = as.formula(df_filtered_sub$G))
+    # rw.lm = estimatr::lm_robust(formula = as.formula(formula), data = df_filtered_sub, weights = df_filtered_sub$nat_weight, clusters = df_filtered_sub$G, se_type = "stata")
+    # beta <- rw.lm$coefficients[["W"]]
+    # se <- rw.lm$std.error[["W"]]
+    # r2 <- rw.lm$r.squared
+    rw_lm = fixest::feols(fml = as.formula(formula), data = df_filtered_sub, weights = ~nat_weight, vcov = ~G)
+    beta = stats::coef(rw_lm)[["W"]]
+    se = sqrt(diag(stats::vcov(rw_lm)))[["W"]]
+    r2 = fixest::r2(rw_lm)["r2"]
     
     mat[v, ] <- c(beta, se, beta/se, if (beta > 0) { sqrt(r2) } else { -sqrt(r2) })
   }

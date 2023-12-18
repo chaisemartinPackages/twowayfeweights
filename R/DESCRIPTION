@@ -24,7 +24,6 @@ Imports:
   huxtable,
   fixest,
   stats,
-  estimatr,
   rlang,
   utils
 Suggests:
