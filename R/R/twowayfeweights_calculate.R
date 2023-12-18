@@ -1,19 +1,29 @@
 #' Internal workhorse function for calculating the twoway FE weights
 #' 
 #' @param dat A data frame.
+#' @param type Desired type of calculation.
 #' @param controls A vector of controls.
-#' @param type Desired type of calculation. 
+#' @param treatments Additional treatments.
 #' @returns A list.
 #' @importFrom fixest feols
-#' @importFrom stats residuals weighted.mean
+#' @importFrom magrittr %>%
+#' @importFrom stats as.formula resid weighted.mean weights
 #' @noRd
 twowayfeweights_calculate = function(
     dat, 
+    type = c("feTR", "fdTR", "feS", "fdS"),
     controls = NULL, 
-    type = c("feTR", "fdTR", "feS", "fdS") 
+    treatments = NULL
 ) {
   
+  .data = NULL
+  
   type = match.arg(type)
+  
+  # GM: Already have this check higher up, but useful for debugging
+  if (!is.null(treatments) && type != "feTR") {
+    stop("When the `other_treatments` argument is specified, you need to specify `type = 'feTR'` too.")
+  }
   
   type_TR = type %in% c("feTR", "fdTR")
   type_fe = type %in% c("feTR", "feS")
@@ -34,25 +44,28 @@ twowayfeweights_calculate = function(
     dat = dplyr::mutate(dat, nat_weight = .data$P_gt * .data[[DVAR]] / mean_D)
   }
 
-  # Set formula using fixed macros (?dsb)  
-  if (is.null(controls)) controls = 1 
+  # GM: Conveniently set formula using fixest macros (see: ?dsb)  
+  if (is.null(controls)) controls = 1
   fes = "Tfactor"
   if (type_fe) fes = c("G", fes)
   
-  # GM: could we make this if(!type_TR)
+  # Add non-NULL treatment vars
+  xvars = c(controls, treatments)
+  
+  # GM: could we make this work through if(!type_TR) ?
   if (type=="fdS") {
-    denom.lm = feols(D ~ .[controls] | .[fes], data = subset(dat, weights!=0), weights = dat$weights)
+    denom.lm = feols(D ~ .[xvars] | .[fes], data = subset(dat, weights!=0), weights = dat$weights)
   } else {
-    denom.lm = feols(D ~ .[controls] | .[fes], data = dat, weights = dat$weights)
+    denom.lm = feols(D ~ .[xvars] | .[fes], data = dat, weights = dat$weights)
   }
   
   EPS_VAR = if (type_fe) "eps_1" else "eps_2"
   
   # GM: could we make this if(!type_TR), combined with weights !=0 above?
   if (type_fe || type=="fdS") {
-    dat[[EPS_VAR]] = residuals(denom.lm)
+    dat[[EPS_VAR]] = resid(denom.lm)
   } else if (type == "fdTR") {
-    dat[[EPS_VAR]] = residuals(denom.lm, na.rm = FALSE)
+    dat[[EPS_VAR]] = resid(denom.lm, na.rm = FALSE)
     dat[[EPS_VAR]] = ifelse(is.na(dat[[EPS_VAR]]), 0, dat[[EPS_VAR]])
   }
   
@@ -63,11 +76,25 @@ twowayfeweights_calculate = function(
   if (type=="feTR") {
 
     dat[["eps_1_E_D_gt"]] = dat[[EPS_VAR]] * dat[[DVAR]]
-    denom_W = weighted.mean(dat[["eps_1_E_D_gt"]], dat[["weights"]], na.rm = TRUE)
+    if (is.null(treatments)) {
+      denom_W = weighted.mean(dat[["eps_1_E_D_gt"]], dat[["weights"]], na.rm = TRUE)
+    } else {
+      
+      denom_W = mean(dat[["eps_1_E_D_gt"]], na.rm = TRUE)
+    }
     
     dat = dat %>% 
       dplyr::mutate(W = .data[[EPS_VAR]] * mean_D / denom_W) %>% 
-      dplyr::mutate(weight_result = .data[["W"]] * .data[["nat_weight"]]) %>%
+      dplyr::mutate(weight_result = .data[["W"]] * .data[["nat_weight"]])
+    
+    if (!is.null(treatments)) {
+      for (treatment in treatments) {
+        varname = fn_treatment_weight_rename(treatment)
+        dat[[varname]] = dat[["W"]] * dat[["P_gt"]] * dat[[treatment]] / mean_D
+      }
+    }
+    
+    dat = dat %>%
       dplyr::select(-.data[[EPS_VAR]], -.data[["P_gt"]])
     
   } else if (type=="feS") {
@@ -88,13 +115,13 @@ twowayfeweights_calculate = function(
   }
   
   ## New regression
-  controls = c("D", controls)
+  xvars = c("D", xvars)
   if (type=="fdS") {
-    beta.lm = feols(Y ~ .[controls] | .[fes], data = subset(dat, weights != 0), weights = dat$weights, only.coef = TRUE)
+    beta.lm = feols(Y ~ .[xvars] | .[fes], data = subset(dat, weights != 0), weights = dat$weights, only.coef = TRUE)
   } else {
-    beta.lm = feols(Y ~ .[controls] | .[fes], data = dat, weights = dat$weights, only.coef = TRUE)
+    beta.lm = feols(Y ~ .[xvars] | .[fes], data = dat, weights = dat$weights, only.coef = TRUE)
   }
-  beta = beta.lm[["D"]] # GM: Should this be DVAR?
+  beta = beta.lm[["D"]]
   
   if (type == "feTR") {
     
@@ -129,7 +156,7 @@ twowayfeweights_calculate = function(
     dat = dat %>% 
       dplyr::arrange(.data$G, .data$Tfactor) %>%
       dplyr::group_by(.data$G) %>% 
-      dplyr::mutate(delta_D = ifelse(.data$TFactorNum - 1 == lag(.data$TFactorNum), .data$D - lag(.data$D), NA)) %>%
+      dplyr::mutate(delta_D = ifelse(.data$TFactorNum - 1 == dplyr::lag(.data$TFactorNum), .data$D - dplyr::lag(.data$D), NA)) %>%
       dplyr::filter(!is.na(.data$delta_D)) %>%
       dplyr::mutate(abs_delta_D = abs(.data$delta_D)) %>%
       dplyr::mutate(s_gt = dplyr::case_when(.data$delta_D > 0 ~ 1,

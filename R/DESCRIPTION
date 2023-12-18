@@ -16,13 +16,13 @@ Description:
     Clément de Chaisemartin, Xavier D'Haultfœuille (2020) <DOI: 10.1257/aer.20181169>.
 License: MIT + file LICENSE
 Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
 Depends: R(>= 3.4.0)
 Imports:
-  conflicted,
   dplyr,
+  magrittr,
   huxtable,
   fixest,
-  stringr,
   stats,
   estimatr,
   rlang,
@@ -37,3 +37,4 @@ Author: Diego Ciccia [aut, cre],
 	Shuo Zhang [aut],
   	Clément de Chaisemartin [aut]
 Packaged: 2023-12-04 13:46:56 UTC; 39380
+RoxygenNote: 7.2.3.9000
