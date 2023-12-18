@@ -145,241 +145,241 @@ twowayfeweights_filter <- function(df, Y, G, T, D, D0, cmd_type, controls, treat
   return(df)
 }
 
-##
-# twowayfeweights_calculate_fetr
-twowayfeweights_calculate_fetr <- function(df, controls) {
-  mean_D <- weighted.mean(df$D, df$weights, na.rm = TRUE)
-  obs <- sum(df$weights)
-  gdf <- df %>% dplyr::group_by(.data$G, .data$T) %>% dplyr::summarise(P_gt = sum(weights))
-  df <- df %>% 
-    dplyr::left_join(gdf, by=c("T", "G")) %>% 
-    dplyr::mutate(P_gt = .data$P_gt / obs) %>% 
-    dplyr::mutate(nat_weight = .data$P_gt * .data$D / mean_D)
-  
-  if (length(controls) == 0) {
-    formula = "D ~ 1"
-  } else {
-    formula = paste(controls, collapse = " + ")
-    formula = paste("D ~ ", formula, sep = "")
-  }
-  formula = paste(formula, " | G + Tfactor", sep = "")
-  denom.lm <- fixest::feols(as.formula(formula), data = df, weights = df$weights)
-  df$eps_1 <- residuals(denom.lm)
-  df$eps_1_E_D_gt <- df$eps_1 * df$D
-  denom_W <- weighted.mean(df$eps_1_E_D_gt, df$weights, na.rm = TRUE)
-  
-  df <- df %>% 
-    dplyr::mutate(W = .data$eps_1 * mean_D / denom_W) %>% 
-    dplyr::mutate(weight_result = .data$W * .data$nat_weight) %>%
-    dplyr::select(-.data$eps_1, -.data$P_gt)
-  
-  if (length(controls) == 0) {
-    formula = "Y ~ D"
-  } else {
-    formula = paste(controls, collapse = " + ")
-    formula = paste("Y ~ D + ", formula, sep = "")
-  }
-  formula = paste(formula, " | G + Tfactor", sep = "")
-  beta.lm <- fixest::feols(as.formula(formula), data = df, weights = df$weights)
-  beta <- as.numeric(coef(beta.lm)["D"])
-  
-  # * Keeping only one observation in each group * period cell
-  # This should be done after this function
-  # bys `group' `time': gen group_period_unit=(_n==1)	
-  # 	drop if group_period_unit==0
-  # 	drop group_period_unit
-  df <- df %>%
-    dplyr::group_by(.data$G, .data$Tfactor) %>%
-    dplyr::filter(dplyr::row_number(.data$D) == 1)
-  
-  return(list(df = df, beta = beta))
-}
-
-## 
-# twowayfeweights_calculate_fdtr
-twowayfeweights_calculate_fdtr <- function(df, controls) {
-  mean_D0 <- weighted.mean(df$D0, df$weights, na.rm = TRUE)
-  obs <- sum(df$weights)
-  gdf <- df %>% dplyr::group_by(.data$G, .data$T) %>% dplyr::summarise(P_gt = sum(.data$weights))
-  df <- df %>% 
-    dplyr::left_join(gdf, by=c("G", "T")) %>% 
-    dplyr::mutate(P_gt = .data$P_gt / obs) %>% 
-    dplyr::mutate(nat_weight = .data$P_gt * .data$D0 / mean_D0)
-  
-  if (length(controls) == 0) {
-    formula = "D ~ 1"
-  } else {
-    formula = paste(controls, collapse = " + ")
-    formula = paste("D ~ ", formula, sep = "")
-  }
-  formula = paste(formula, " | Tfactor", sep = "")
-  denom.lm <- fixest::feols(as.formula(formula), data = df, weights = df$weights)
-  df$eps_2 <- residuals(denom.lm, na.rm = FALSE)
-  # df$eps_2 <- df$D - predict(denom.lm, df)
-  
-  df <- df %>% dplyr::mutate(eps_2 = ifelse(is.na(.data$eps_2), 0, .data$eps_2))
-  
-
-  if (length(controls) == 0) {
-    formula = "Y ~ D"
-  } else {
-    formula = paste(controls, collapse = " + ")
-    formula = paste("Y ~ D + ", formula, sep = "")
-  }
-  formula = paste(formula, " | Tfactor", sep = "")
-  beta.lm <- fixest::feols(as.formula(formula), data = df, weights = df$weights)
-  beta <- as.numeric(coef(beta.lm)["D"])
-  
-  df <- df %>% 
-    dplyr::arrange(.data$G, .data$TFactorNum) %>%
-    dplyr::group_by(.data$G) %>% 
-    dplyr::mutate(w_tilde_2 = ifelse(.data$TFactorNum + 1 == dplyr::lead(.data$TFactorNum), .data$eps_2 - dplyr::lead(.data$eps_2) * (dplyr::lead(.data$P_gt) / .data$P_gt), NA)) %>%
-    dplyr::mutate(w_tilde_2 = ifelse(is.na(.data$w_tilde_2) | is.infinite(.data$w_tilde_2), .data$eps_2, .data$w_tilde_2)) %>%
-    dplyr::mutate(w_tilde_2_E_D_gt = .data$w_tilde_2 * .data$D0)
-  
-  denom_W <- weighted.mean(df$w_tilde_2_E_D_gt, df$P_gt, na.rm = TRUE)
-  df <- df %>% 
-    dplyr::mutate(W = .data$w_tilde_2 * mean_D0 / denom_W) %>% 
-    dplyr::mutate(weight_result = .data$W * .data$nat_weight)
-  df <- df %>%
-    dplyr::select(-.data$eps_2, -.data$P_gt, -.data$w_tilde_2, -.data$w_tilde_2_E_D_gt)
-  
-  return(list(df = df, beta = beta))
-
-}
-
-
-##
-# twowayfeweights_calculate_fes
-twowayfeweights_calculate_fes <- function(df, controls) {
-  obs <- sum(df$weights)
-  gdf <- df %>% dplyr::group_by(.data$G, .data$T) %>% dplyr::summarise(P_gt = sum(.data$weights))
-  df <- df %>% 
-    dplyr::left_join(gdf, by=c("T", "G")) %>% 
-    dplyr::mutate(P_gt = .data$P_gt / obs)
-  
-  if (length(controls) == 0) {
-    formula = "D ~ 1"
-  } else {
-    formula = paste(controls, collapse = " + ")
-    formula = paste("D ~ ", formula, sep = "")
-  }
-  formula = paste(formula, " | G + Tfactor", sep = "")
-  denom.lm <- fixest::feols(as.formula(formula), data = df, weights = df$weights)
-  df$eps_1 <- residuals(denom.lm)
-  # df$eps_1 <- df$D - predict(denom.lm, df)
-  
-  df <- df %>% 
-    dplyr::mutate(eps_1_weight = .data$eps_1 * .data$weights) %>%
-    dplyr::arrange(.data$G, .data$Tfactor) %>%
-    dplyr::group_by(.data$G) %>%
-    dplyr::mutate(E_eps_1_g_ge_aux = rev(cumsum(rev(.data$eps_1_weight)))) %>%
-    dplyr::mutate(weights_aux = rev(cumsum(rev(.data$weights)))) %>%
-    dplyr::mutate(E_eps_1_g_ge = .data$E_eps_1_g_ge_aux / .data$weights_aux)
-  
-  if (length(controls) == 0) {
-    formula = "Y ~ D"
-  } else {
-    formula = paste(controls, collapse = " + ")
-    formula = paste("Y ~ D + ", formula, sep = "")
-  }
-  formula = paste(formula, " | G + Tfactor", sep = "")
-  beta.lm <- fixest::feols(as.formula(formula), data = df, weights = df$weights)
-  beta <- as.numeric(coef(beta.lm)["D"])
-  
-  # * Keeping only one observation in each group * period cell
-  #   bys `group' `time': gen group_period_unit=(_n==1)	
-  # 	drop if group_period_unit==0
-  # 	drop group_period_unit
-  
-  # df <- df %>% 
-  #   group_by(.data$G, .data$Tfactor) %>%
-  #   summarize(.data$P_gt, .data$nat_weight)
-  
-  df <- df %>% 
-    dplyr::arrange(.data$G, .data$Tfactor) %>%
-    dplyr::group_by(.data$G) %>% 
-    dplyr::mutate(delta_D = ifelse(.data$TFactorNum - 1 == lag(.data$TFactorNum), .data$D - lag(.data$D), NA)) %>%
-    dplyr::filter(!is.na(.data$delta_D)) %>%
-    dplyr::mutate(abs_delta_D = abs(.data$delta_D)) %>%
-    dplyr::mutate(s_gt = dplyr::case_when(.data$delta_D > 0 ~ 1,
-                            .data$delta_D < 0 ~ -1,
-                            TRUE ~ 0)) %>%
-    dplyr::mutate(nat_weight = .data$P_gt * .data$abs_delta_D)
-  
-  P_S = sum(df$nat_weight, na.rm = TRUE)
-  df <- df %>% 
-    dplyr::mutate(nat_weight = .data$nat_weight / P_S) %>%
-    dplyr::mutate(om_tilde_1 = .data$s_gt * .data$E_eps_1_g_ge / .data$P_gt)
-  
-  denom_W = weighted.mean(df$om_tilde_1, df$nat_weight, na.rm = TRUE)
-  df <- df %>%
-    dplyr::mutate(W = .data$om_tilde_1 / denom_W) %>%
-    dplyr::mutate(weight_result = .data$W * .data$nat_weight) %>%
-    dplyr::select(-.data$eps_1, -.data$P_gt, -.data$om_tilde_1, -.data$E_eps_1_g_ge,
-           -.data$E_eps_1_g_ge_aux, -.data$weights_aux, -.data$abs_delta_D, -.data$delta_D)
-  
-  return(list(df = df, beta = beta))
-}
-
-##
-# twowayfeweights_calculate_fds
-twowayfeweights_calculate_fds <- function(df, controls) {
-  obs <- sum(df$weights)
-  gdf <- df %>% dplyr::group_by(.data$G, .data$T) %>% dplyr::summarise(P_gt = sum(.data$weights))
-  df <- df %>% 
-    dplyr::left_join(gdf, by=c("T", "G")) %>% 
-    dplyr::mutate(P_gt = .data$P_gt / obs)
-  
-  if (length(controls) == 0) {
-    formula = "D ~ 1"
-  } else {
-    formula = paste(controls, collapse = " + ")
-    formula = paste("D ~ ", formula, sep = "")
-  }
-  formula = paste(formula, " | Tfactor", sep = "")
-  denom.lm <- fixest::feols(as.formula(formula), data = subset(df, weights != 0), weights = df$weights)
-  df$eps_2 <- residuals(denom.lm)
-  # df$eps_2 <- df$D - predict(denom.lm, df)
-  
-  if (length(controls) == 0) {
-    formula = "Y ~ D"
-  } else {
-    formula = paste(controls, collapse = " + ")
-    formula = paste("Y ~ D + ", formula, sep = "")
-  }
-  formula = paste(formula, " | Tfactor", sep = "")
-  beta.lm <- fixest::feols(as.formula(formula), data = subset(df, weights != 0), weights = df$weights)
-  beta <- as.numeric(coef(beta.lm)["D"])
-  
-  # * Keeping only one observation in each group * period cell
-  #   bys `group' `time': gen group_period_unit=(_n==1)	
-  # 	drop if group_period_unit==0
-  # 	drop group_period_unit
-  
-  # df <- df %>% 
-  #   group_by(.data$G, .data$Tfactor) %>%
-  #   summarize(.data$P_gt, .data$nat_weight)
-  
-  df <- df %>%
-    dplyr::mutate(s_gt = dplyr::case_when(.data$D > 0 ~ 1,
-                            .data$D < 0 ~ -1,
-                            TRUE ~ 0)) %>%
-    dplyr::mutate(abs_delta_D = abs(.data$D)) %>%
-    dplyr::mutate(nat_weight = .data$P_gt * .data$abs_delta_D)
-  
-  P_S = sum(df$nat_weight)
-  df <- df %>% 
-    dplyr::mutate(nat_weight = .data$nat_weight / P_S) %>%
-    dplyr::mutate(W = .data$s_gt * .data$eps_2)
-  denom_W = weighted.mean(df$W, df$nat_weight, na.rm = TRUE)
-  df <- df %>% 
-    dplyr::mutate(W = .data$W / denom_W) %>% 
-    dplyr::mutate(weight_result = .data$W * .data$nat_weight) %>%
-    dplyr::select(-.data$eps_2, -.data$P_gt, -.data$abs_delta_D)
-  
-  return(list(df = df, beta = beta))
-}
+# ##
+# # twowayfeweights_calculate_fetr
+# twowayfeweights_calculate_fetr <- function(df, controls) {
+#   mean_D <- weighted.mean(df$D, df$weights, na.rm = TRUE)
+#   obs <- sum(df$weights)
+#   gdf <- df %>% dplyr::group_by(.data$G, .data$T) %>% dplyr::summarise(P_gt = sum(weights))
+#   df <- df %>% 
+#     dplyr::left_join(gdf, by=c("T", "G")) %>% 
+#     dplyr::mutate(P_gt = .data$P_gt / obs) %>% 
+#     dplyr::mutate(nat_weight = .data$P_gt * .data$D / mean_D)
+#   
+#   if (length(controls) == 0) {
+#     formula = "D ~ 1"
+#   } else {
+#     formula = paste(controls, collapse = " + ")
+#     formula = paste("D ~ ", formula, sep = "")
+#   }
+#   formula = paste(formula, " | G + Tfactor", sep = "")
+#   denom.lm <- fixest::feols(as.formula(formula), data = df, weights = df$weights)
+#   df$eps_1 <- residuals(denom.lm)
+#   df$eps_1_E_D_gt <- df$eps_1 * df$D
+#   denom_W <- weighted.mean(df$eps_1_E_D_gt, df$weights, na.rm = TRUE)
+#   
+#   df <- df %>% 
+#     dplyr::mutate(W = .data$eps_1 * mean_D / denom_W) %>% 
+#     dplyr::mutate(weight_result = .data$W * .data$nat_weight) %>%
+#     dplyr::select(-.data$eps_1, -.data$P_gt)
+#   
+#   if (length(controls) == 0) {
+#     formula = "Y ~ D"
+#   } else {
+#     formula = paste(controls, collapse = " + ")
+#     formula = paste("Y ~ D + ", formula, sep = "")
+#   }
+#   formula = paste(formula, " | G + Tfactor", sep = "")
+#   beta.lm <- fixest::feols(as.formula(formula), data = df, weights = df$weights)
+#   beta <- as.numeric(coef(beta.lm)["D"])
+#   
+#   # * Keeping only one observation in each group * period cell
+#   # This should be done after this function
+#   # bys `group' `time': gen group_period_unit=(_n==1)	
+#   # 	drop if group_period_unit==0
+#   # 	drop group_period_unit
+#   df <- df %>%
+#     dplyr::group_by(.data$G, .data$Tfactor) %>%
+#     dplyr::filter(dplyr::row_number(.data$D) == 1)
+#   
+#   return(list(df = df, beta = beta))
+# }
+# 
+# ## 
+# # twowayfeweights_calculate_fdtr
+# twowayfeweights_calculate_fdtr <- function(df, controls) {
+#   mean_D0 <- weighted.mean(df$D0, df$weights, na.rm = TRUE)
+#   obs <- sum(df$weights)
+#   gdf <- df %>% dplyr::group_by(.data$G, .data$T) %>% dplyr::summarise(P_gt = sum(.data$weights))
+#   df <- df %>% 
+#     dplyr::left_join(gdf, by=c("G", "T")) %>% 
+#     dplyr::mutate(P_gt = .data$P_gt / obs) %>% 
+#     dplyr::mutate(nat_weight = .data$P_gt * .data$D0 / mean_D0)
+#   
+#   if (length(controls) == 0) {
+#     formula = "D ~ 1"
+#   } else {
+#     formula = paste(controls, collapse = " + ")
+#     formula = paste("D ~ ", formula, sep = "")
+#   }
+#   formula = paste(formula, " | Tfactor", sep = "")
+#   denom.lm <- fixest::feols(as.formula(formula), data = df, weights = df$weights)
+#   df$eps_2 <- residuals(denom.lm, na.rm = FALSE)
+#   # df$eps_2 <- df$D - predict(denom.lm, df)
+#   
+#   df <- df %>% dplyr::mutate(eps_2 = ifelse(is.na(.data$eps_2), 0, .data$eps_2))
+#   
+# 
+#   if (length(controls) == 0) {
+#     formula = "Y ~ D"
+#   } else {
+#     formula = paste(controls, collapse = " + ")
+#     formula = paste("Y ~ D + ", formula, sep = "")
+#   }
+#   formula = paste(formula, " | Tfactor", sep = "")
+#   beta.lm <- fixest::feols(as.formula(formula), data = df, weights = df$weights)
+#   beta <- as.numeric(coef(beta.lm)["D"])
+#   
+#   df <- df %>% 
+#     dplyr::arrange(.data$G, .data$TFactorNum) %>%
+#     dplyr::group_by(.data$G) %>% 
+#     dplyr::mutate(w_tilde_2 = ifelse(.data$TFactorNum + 1 == dplyr::lead(.data$TFactorNum), .data$eps_2 - dplyr::lead(.data$eps_2) * (dplyr::lead(.data$P_gt) / .data$P_gt), NA)) %>%
+#     dplyr::mutate(w_tilde_2 = ifelse(is.na(.data$w_tilde_2) | is.infinite(.data$w_tilde_2), .data$eps_2, .data$w_tilde_2)) %>%
+#     dplyr::mutate(w_tilde_2_E_D_gt = .data$w_tilde_2 * .data$D0)
+#   
+#   denom_W <- weighted.mean(df$w_tilde_2_E_D_gt, df$P_gt, na.rm = TRUE)
+#   df <- df %>% 
+#     dplyr::mutate(W = .data$w_tilde_2 * mean_D0 / denom_W) %>% 
+#     dplyr::mutate(weight_result = .data$W * .data$nat_weight)
+#   df <- df %>%
+#     dplyr::select(-.data$eps_2, -.data$P_gt, -.data$w_tilde_2, -.data$w_tilde_2_E_D_gt)
+#   
+#   return(list(df = df, beta = beta))
+# 
+# }
+# 
+# 
+# ##
+# # twowayfeweights_calculate_fes
+# twowayfeweights_calculate_fes <- function(df, controls) {
+#   obs <- sum(df$weights)
+#   gdf <- df %>% dplyr::group_by(.data$G, .data$T) %>% dplyr::summarise(P_gt = sum(.data$weights))
+#   df <- df %>% 
+#     dplyr::left_join(gdf, by=c("T", "G")) %>% 
+#     dplyr::mutate(P_gt = .data$P_gt / obs)
+#   
+#   if (length(controls) == 0) {
+#     formula = "D ~ 1"
+#   } else {
+#     formula = paste(controls, collapse = " + ")
+#     formula = paste("D ~ ", formula, sep = "")
+#   }
+#   formula = paste(formula, " | G + Tfactor", sep = "")
+#   denom.lm <- fixest::feols(as.formula(formula), data = df, weights = df$weights)
+#   df$eps_1 <- residuals(denom.lm)
+#   # df$eps_1 <- df$D - predict(denom.lm, df)
+#   
+#   df <- df %>% 
+#     dplyr::mutate(eps_1_weight = .data$eps_1 * .data$weights) %>%
+#     dplyr::arrange(.data$G, .data$Tfactor) %>%
+#     dplyr::group_by(.data$G) %>%
+#     dplyr::mutate(E_eps_1_g_ge_aux = rev(cumsum(rev(.data$eps_1_weight)))) %>%
+#     dplyr::mutate(weights_aux = rev(cumsum(rev(.data$weights)))) %>%
+#     dplyr::mutate(E_eps_1_g_ge = .data$E_eps_1_g_ge_aux / .data$weights_aux)
+#   
+#   if (length(controls) == 0) {
+#     formula = "Y ~ D"
+#   } else {
+#     formula = paste(controls, collapse = " + ")
+#     formula = paste("Y ~ D + ", formula, sep = "")
+#   }
+#   formula = paste(formula, " | G + Tfactor", sep = "")
+#   beta.lm <- fixest::feols(as.formula(formula), data = df, weights = df$weights)
+#   beta <- as.numeric(coef(beta.lm)["D"])
+#   
+#   # * Keeping only one observation in each group * period cell
+#   #   bys `group' `time': gen group_period_unit=(_n==1)	
+#   # 	drop if group_period_unit==0
+#   # 	drop group_period_unit
+#   
+#   # df <- df %>% 
+#   #   group_by(.data$G, .data$Tfactor) %>%
+#   #   summarize(.data$P_gt, .data$nat_weight)
+#   
+#   df <- df %>% 
+#     dplyr::arrange(.data$G, .data$Tfactor) %>%
+#     dplyr::group_by(.data$G) %>% 
+#     dplyr::mutate(delta_D = ifelse(.data$TFactorNum - 1 == lag(.data$TFactorNum), .data$D - lag(.data$D), NA)) %>%
+#     dplyr::filter(!is.na(.data$delta_D)) %>%
+#     dplyr::mutate(abs_delta_D = abs(.data$delta_D)) %>%
+#     dplyr::mutate(s_gt = dplyr::case_when(.data$delta_D > 0 ~ 1,
+#                             .data$delta_D < 0 ~ -1,
+#                             TRUE ~ 0)) %>%
+#     dplyr::mutate(nat_weight = .data$P_gt * .data$abs_delta_D)
+#   
+#   P_S = sum(df$nat_weight, na.rm = TRUE)
+#   df <- df %>% 
+#     dplyr::mutate(nat_weight = .data$nat_weight / P_S) %>%
+#     dplyr::mutate(om_tilde_1 = .data$s_gt * .data$E_eps_1_g_ge / .data$P_gt)
+#   
+#   denom_W = weighted.mean(df$om_tilde_1, df$nat_weight, na.rm = TRUE)
+#   df <- df %>%
+#     dplyr::mutate(W = .data$om_tilde_1 / denom_W) %>%
+#     dplyr::mutate(weight_result = .data$W * .data$nat_weight) %>%
+#     dplyr::select(-.data$eps_1, -.data$P_gt, -.data$om_tilde_1, -.data$E_eps_1_g_ge,
+#            -.data$E_eps_1_g_ge_aux, -.data$weights_aux, -.data$abs_delta_D, -.data$delta_D)
+#   
+#   return(list(df = df, beta = beta))
+# }
+# 
+# ##
+# # twowayfeweights_calculate_fds
+# twowayfeweights_calculate_fds <- function(df, controls) {
+#   obs <- sum(df$weights)
+#   gdf <- df %>% dplyr::group_by(.data$G, .data$T) %>% dplyr::summarise(P_gt = sum(.data$weights))
+#   df <- df %>% 
+#     dplyr::left_join(gdf, by=c("T", "G")) %>% 
+#     dplyr::mutate(P_gt = .data$P_gt / obs)
+#   
+#   if (length(controls) == 0) {
+#     formula = "D ~ 1"
+#   } else {
+#     formula = paste(controls, collapse = " + ")
+#     formula = paste("D ~ ", formula, sep = "")
+#   }
+#   formula = paste(formula, " | Tfactor", sep = "")
+#   denom.lm <- fixest::feols(as.formula(formula), data = subset(df, weights != 0), weights = df$weights)
+#   df$eps_2 <- residuals(denom.lm)
+#   # df$eps_2 <- df$D - predict(denom.lm, df)
+#   
+#   if (length(controls) == 0) {
+#     formula = "Y ~ D"
+#   } else {
+#     formula = paste(controls, collapse = " + ")
+#     formula = paste("Y ~ D + ", formula, sep = "")
+#   }
+#   formula = paste(formula, " | Tfactor", sep = "")
+#   beta.lm <- fixest::feols(as.formula(formula), data = subset(df, weights != 0), weights = df$weights)
+#   beta <- as.numeric(coef(beta.lm)["D"])
+#   
+#   # * Keeping only one observation in each group * period cell
+#   #   bys `group' `time': gen group_period_unit=(_n==1)	
+#   # 	drop if group_period_unit==0
+#   # 	drop group_period_unit
+#   
+#   # df <- df %>% 
+#   #   group_by(.data$G, .data$Tfactor) %>%
+#   #   summarize(.data$P_gt, .data$nat_weight)
+#   
+#   df <- df %>%
+#     dplyr::mutate(s_gt = dplyr::case_when(.data$D > 0 ~ 1,
+#                             .data$D < 0 ~ -1,
+#                             TRUE ~ 0)) %>%
+#     dplyr::mutate(abs_delta_D = abs(.data$D)) %>%
+#     dplyr::mutate(nat_weight = .data$P_gt * .data$abs_delta_D)
+#   
+#   P_S = sum(df$nat_weight)
+#   df <- df %>% 
+#     dplyr::mutate(nat_weight = .data$nat_weight / P_S) %>%
+#     dplyr::mutate(W = .data$s_gt * .data$eps_2)
+#   denom_W = weighted.mean(df$W, df$nat_weight, na.rm = TRUE)
+#   df <- df %>% 
+#     dplyr::mutate(W = .data$W / denom_W) %>% 
+#     dplyr::mutate(weight_result = .data$W * .data$nat_weight) %>%
+#     dplyr::select(-.data$eps_2, -.data$P_gt, -.data$abs_delta_D)
+#   
+#   return(list(df = df, beta = beta))
+# }
 
 
 ##
