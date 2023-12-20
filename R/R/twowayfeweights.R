@@ -156,8 +156,8 @@ twowayfeweights <- function(
     D,
     type = c("feTR", "feS", "fdTR", "fdS"),
     D0 = NULL,
-    summary_measures = NULL,
-    controls = c(),
+    summary_measures = FALSE,
+    controls = NULL,
     weights = NULL,
     other_treatments = NULL,
     test_random_weights = c(),
@@ -185,11 +185,20 @@ twowayfeweights <- function(
   res <- twowayfeweights_calculate(df_filtered, type = type, controls = controls_rename, treatments = treatments_rename)
   if (is.null(other_treatments)) {
     res <- twowayfeweights_result(res$df, res$beta, random_weight_rename)
-    df_result <- twowayfeweights_print_results(type, res, D, summary_measures, res$beta, random_weight_rename)
+    # df_result <- twowayfeweights_print_results(type, res, D, summary_measures, res$beta, random_weight_rename)
   } else {
     res <- twowayfeweights_result_other_treatment(res$df, treatments_rename, res$beta, random_weight_rename)
-    df_result <- twowayfeweights_print_result_other_treatment(res, treatments_rename, D, res$beta, random_weight_rename)
+    # df_result <- twowayfeweights_print_result_other_treatment(res, treatments_rename, D, res$beta, random_weight_rename)
   }
+  
+  # Set class and add extra features for post-processing (printing etc.)
+  class(res) = "twowayfeweights"
+  
+  res$type = type
+  res$params = list(Y = Y, G = G, T = T, D = D, D0 = D0)
+  res$summary_measures = summary_measures
+  res$random_weights = random_weight_rename
+  
   
   if (!is.null(path)) {
     write.csv(df_result, path, row.names = FALSE)
