@@ -16,7 +16,7 @@ twowayfeweights(
   controls = NULL,
   weights = NULL,
   other_treatments = NULL,
-  test_random_weights = c(),
+  test_random_weights = NULL,
   path = NULL
 )
 }
@@ -116,10 +116,10 @@ option is specified, the weights attached to the other treatments are also
 saved.}
 }
 \value{
-twowayfeweights returns data frame that contains the following columns
-T: time variable
-G: group variable
-weight: the result of the weight
+A list object with an additional "twowayfeweights" class attribute to
+enable bespoke print (and other) methods. Included among the slots of the
+returned list object is a data frame containing the weights attached to
+each group*time cell.
 }
 \description{
 Estimates the weights and measure of robustness to treatment
@@ -134,21 +134,19 @@ heterogeneous treatment effects.
 \section{FAQ}{
 
 
-How can one interpret the summary measures of the regression's robustness to heterogeneous treatment effects?
-\itemize{
-\item When the two-way fixed effects regression has only one treatment variable, the command reports two summary measures of the robustness of the treatment coefficient beta to treatment heterogeneity across groups and over time.  The first one is defined in point (i) of Corollary 1 in de Chaisemartin & D'Haultfoeuille (2020a). It corresponds to the minimal value of the standard deviation of the treatment effect across the treated groups and time periods under which beta and the average treatment effect on the treated (ATT) could be of opposite signs. When that number is large, this means that beta and the ATT can only be of opposite signs if there is a lot of treatment effect heterogeneity across groups and time periods. When that number is low, this means that beta and the ATT can be of opposite signs even if there is not a lot of treatment effect heterogeneity across groups and time periods. The second summary measure is defined in point (ii) of Corollary 1 in de Chaisemartin & D'Haultfoeuille (2020a).  It corresponds to the minimal value of the standard deviation of the treatment effect across the treated groups and time periods under which beta could be of a different sign than the treatment effect in all the treated group and time periods.
-}
+\emph{Q. How can one interpret the summary measures of the regression's robustness to heterogeneous treatment effects?}
 
-How can I tell if the first summary measure is high or low?
-\itemize{
-\item Assume that the first summary measure is equal to x. How can you tell if x is a low or a high amount of treatment effect heterogeneity? This is not an easy question to answer, but here is one possibility.  Let us assume that the treatment effects of (g,t) cells are drawn from a uniform distribution. Then, to have that the mean of that distribution is 0 while its standard deviation is x, the treatment effects should be uniformly distributed on the \verb{[-sqrt(3)x,sqrt(3)x]} interval. Then, you can ask yourself: is it reasonable to assume that some (g,t) cells have a treatment effect as large as sqrt(3)x, while other cells have a treatment effect as low as \verb{-sqrt(3)x}? If the answer is negative (you think that it is not reasonable to assume that the treatment effect will exceed the \verb{+/-sqrt(3)x} bounds for some (g,t) cells), this means that the uniform distribution of treatment effects compatible with an ATT of 0 and a standard deviation of x seems implausible to you. Then, you can consider that the command's first summary measure is high, and that it is unlikely that beta and the ATT are of a different sign. Conversely, if the answer is positive (you believe that the treatment effect might exceed the bounds for some (g,t) cells), it may not be unlikely that beta and the ATT are of a different sign.
-\item The previous sensitivity exercise assumes that treatment effects follow a uniform distribution. You may find it more reasonable to assume that they are, say, normally distributed. Then you can conduct the following, similar exercise. If the treatment effects of (g,t) cells are drawn from a normal distribution with mean 0 and standard deviation x normal distribution, 95\\% of them will fall within the \verb{[-1.96x,1.96x]} interval, and 5\\% will fall outside of that interval. Then, you can ask yourself: is it reasonable to assume that 2.5\\% of (g,t) cells have a treatment effect larger than 1.96x, while 2.5\\% have a treatment effect lower than -1.96?  If the answer is negative (you are willing to assume that at most 2.5\\% of the treatment effects fall out of the \verb{[-1.96x,1.96x]} interval at each side), this means that the normal distribution of treatment effects compatible with an ATT of 0 and a standard deviation of x seems implausible to you. Then, you can consider that the command's first summary measure is high, and that it is unlikely that beta and the ATT are of a different sign.
-}
+When the two-way fixed effects regression has only one treatment variable, the command reports two summary measures of the robustness of the treatment coefficient beta to treatment heterogeneity across groups and over time.  The first one is defined in point (i) of Corollary 1 in de Chaisemartin & D'Haultfoeuille (2020a). It corresponds to the minimal value of the standard deviation of the treatment effect across the treated groups and time periods under which beta and the average treatment effect on the treated (ATT) could be of opposite signs. When that number is large, this means that beta and the ATT can only be of opposite signs if there is a lot of treatment effect heterogeneity across groups and time periods. When that number is low, this means that beta and the ATT can be of opposite signs even if there is not a lot of treatment effect heterogeneity across groups and time periods. The second summary measure is defined in point (ii) of Corollary 1 in de Chaisemartin & D'Haultfoeuille (2020a).  It corresponds to the minimal value of the standard deviation of the treatment effect across the treated groups and time periods under which beta could be of a different sign than the treatment effect in all the treated group and time periods.
 
-How can I tell if the second summary measure is high or low?
-\itemize{
-\item Assume that the second summary measure is equal to x. To fix ideas, let us assume that beta>0. Let us assume that the treatment effects of (g,t) cells are drawn from a uniform distribution. Then, one could have that those effects are all negative, with a standard deviation equal to x, for instance if they are uniformly drawn from the \verb{[-2sqrt(3)x,0]}. Then, you can ask yourself: is it reasonable to assume that some (g,t) cells have a treatment effect as low as \verb{-2sqrt(3)x}? If the answer is negative (you are not willing to assume that some (g,t) cells have a treatment effect lower than \verb{-2sqrt(3)x)}, this means that the uniform distribution of treatment effects compatible with sign reversal and a standard deviation of x seems implausible to you. Then, you can consider that the command's second summary measure is high, and that sign reversal is unlikely.  If the treatment effects of (g,t) cells are all negative, they cannot follow a normal distribution, so we do not discuss that possibility here.
-}
+\emph{Q. How can I tell if the first summary measure is high or low?}
+
+Assume that the first summary measure is equal to x. How can you tell if x is a low or a high amount of treatment effect heterogeneity? This is not an easy question to answer, but here is one possibility.  Let us assume that the treatment effects of (g,t) cells are drawn from a uniform distribution. Then, to have that the mean of that distribution is 0 while its standard deviation is x, the treatment effects should be uniformly distributed on the \verb{[-sqrt(3)x,sqrt(3)x]} interval. Then, you can ask yourself: is it reasonable to assume that some (g,t) cells have a treatment effect as large as \verb{sqrt(3)x}, while other cells have a treatment effect as low as \verb{-sqrt(3)x}? If the answer is negative (you think that it is not reasonable to assume that the treatment effect will exceed the \verb{+/-sqrt(3)x} bounds for some (g,t) cells), this means that the uniform distribution of treatment effects compatible with an ATT of 0 and a standard deviation of x seems implausible to you. Then, you can consider that the command's first summary measure is high, and that it is unlikely that beta and the ATT are of a different sign. Conversely, if the answer is positive (you believe that the treatment effect might exceed the bounds for some (g,t) cells), it may not be unlikely that beta and the ATT are of a different sign.
+
+The previous sensitivity exercise assumes that treatment effects follow a uniform distribution. You may find it more reasonable to assume that they are, say, normally distributed. Then you can conduct the following, similar exercise. If the treatment effects of (g,t) cells are drawn from a normal distribution with mean 0 and standard deviation x normal distribution, 95\\% of them will fall within the \verb{[-1.96x,1.96x]} interval, and 5\\% will fall outside of that interval. Then, you can ask yourself: is it reasonable to assume that 2.5\\% of (g,t) cells have a treatment effect larger than 1.96x, while 2.5\\% have a treatment effect lower than -1.96?  If the answer is negative (you are willing to assume that at most 2.5\\% of the treatment effects fall out of the \verb{[-1.96x,1.96x]} interval at each side), this means that the normal distribution of treatment effects compatible with an ATT of 0 and a standard deviation of x seems implausible to you. Then, you can consider that the command's first summary measure is high, and that it is unlikely that beta and the ATT are of a different sign.
+
+\emph{Q. How can I tell if the second summary measure is high or low?}
+
+Assume that the second summary measure is equal to x. To fix ideas, let us assume that beta>0. Let us assume that the treatment effects of (g,t) cells are drawn from a uniform distribution. Then, one could have that those effects are all negative, with a standard deviation equal to x, for instance if they are uniformly drawn from the \verb{[-2sqrt(3)x,0]}. Then, you can ask yourself: is it reasonable to assume that some (g,t) cells have a treatment effect as low as \verb{-2sqrt(3)x}? If the answer is negative (you are not willing to assume that some (g,t) cells have a treatment effect lower than \verb{-2sqrt(3)x)}, this means that the uniform distribution of treatment effects compatible with sign reversal and a standard deviation of x seems implausible to you. Then, you can consider that the command's second summary measure is high, and that sign reversal is unlikely.  If the treatment effects of (g,t) cells are all negative, they cannot follow a normal distribution, so we do not discuss that possibility here.
 }
 
 \examples{
