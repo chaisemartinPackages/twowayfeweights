@@ -265,85 +265,85 @@ twowayfeweights_result <- function(df, beta, random_weights) {
   
 }
 
-##
-# twowayfeweights_print_results
-twowayfeweights_print_results <- function(cmd_type, r, d, summary_measures, twfe, random_weights) {
-  treat = dplyr::case_when(cmd_type == "feTR" || cmd_type == "fdTR" ~ "ATT",
-                    cmd_type == "feS" || cmd_type == "fdS" ~ "LATE", 
-                    TRUE ~ "BLANK")
-  assumption = dplyr::case_when(cmd_type == "feTR" || cmd_type == "fdTR" ~ "Under the common trends assumption",
-                         cmd_type == "feS" || cmd_type == "fdS" ~ "Under the common trends, treatment monotonicity, and if groups' treatment effect does not change over time", 
-                         TRUE ~ "BLANK")
-  
-  tot_weights <- r$nr_plus + r$nr_minus
-  tot_sums <- round(r$sum_plus + r$sum_minus, 4)
-  
-  cat("\n")
-  print(paste(rep("-",68), collapse= ""))
-  printf("%s, ", assumption)
-  printf("beta estimates a weighted sum of %d %ss.", r$nr_weights, treat)
-  printf("%d %s receive a positive weight, and %d receive a negative weight.", r$nr_plus, treat, r$nr_minus)
-  print(paste(rep("-",68), collapse= ""))
-  
-  ##Doulo
-  print_out <- huxtable::hux(c(paste0("Treat. var: ", d),"Positive weights", "Negative weights", "Total")
-                ,c(paste0(treat, "s"), round(r$nr_plus, 2), round(r$nr_minus, 2), tot_weights),
-                c(paste0("\U03A3", " weights"), round(r$sum_plus, 4), round(r$sum_minus, 4), tot_sums),
-                add_colnames = FALSE
-  )
-  
-  environment_res <- list(r$sum_minus, r$sensibility, r$beta)
-  environment_names <- c("sum_neg_w", "lb_se_te", "beta")
-  
-  print_out = print_out %>% 
-    huxtable::set_all_padding(4) %>% 
-    huxtable::set_outer_padding(0) %>% 
-    #set_number_format(2) %>% 
-    huxtable::set_bottom_border(row = 1, col = huxtable::everywhere) %>% 
-    huxtable::set_top_border(row = 1, col = huxtable::everywhere) %>% 
-    huxtable::set_bottom_border(row = 3, col = huxtable::everywhere) %>% 
-    huxtable::set_width(2) %>% 
-    huxtable::set_align(huxtable::everywhere, 2:3, "center") %>% 
-    huxtable::set_bold(1, huxtable::everywhere) %>% 
-    huxtable::set_bottom_border(row = 4, col = huxtable::everywhere)
-  
-  colnames(print_out) = NULL
-  huxtable::print_screen(print_out) 
-  
-  ###If we want to add the option export_excel
-  # export_path  = "export_path.xlsx"
-  # if(length(export_path)>0){
-  #   quick_xlsx(print_out %>%set_width(1.5), file = export_path)
-  # }
-  
-  if (!is.null(summary_measures)) {
-      subscr <- substr(cmd_type, 1, 2)
-      print("Summary Measures:")
-      printf("TWFE Coefficient (\U03B2_%s): %.4f", subscr, twfe)
-      printf("min \U03C3(\U0394) compatible with \U03B2_%s and \U0394_TR = 0: %.4f", subscr, r$sensibility)
-    if (r$sum_minus < 0) {
-      printf("min \U03C3(\U0394) compatible with \U03B2_%s and \U0394_TR of a different sign: %.4f", subscr, r$sensibility2)
-      environment_res <- append(environment_res, r$sensibility2)
-      environment_names <- c(environment_names, "lb_se_te2") 
-    } 
-    print("Reference: Corollary 1, de Chaisemartin, C and D'Haultfoeuille, X (2020a)")
-  }
-  
-  if (length(random_weights) > 0) {
-    cat("\n")
-    print("Test random weights")
-    print(r$mat)
-    environment_res <- append(environment_res, r$mat)
-    environment_names <- c(environment_names, "randomweightstest")
-  }
-  
-  cat("\n")
-  print("The development of this package was funded by the European Union (ERC, REALLYCREDIBLE,GA N. 101043899).")
-  
-  names(environment_res) <- environment_names
-  list2env(environment_res, envir = .GlobalEnv) ## BIG OOF
-  r$df_result
-}
+# ##
+# # twowayfeweights_print_results
+# twowayfeweights_print_results <- function(cmd_type, r, d, summary_measures, twfe, random_weights) {
+#   treat = dplyr::case_when(cmd_type == "feTR" || cmd_type == "fdTR" ~ "ATT",
+#                     cmd_type == "feS" || cmd_type == "fdS" ~ "LATE", 
+#                     TRUE ~ "BLANK")
+#   assumption = dplyr::case_when(cmd_type == "feTR" || cmd_type == "fdTR" ~ "Under the common trends assumption",
+#                          cmd_type == "feS" || cmd_type == "fdS" ~ "Under the common trends, treatment monotonicity, and if groups' treatment effect does not change over time", 
+#                          TRUE ~ "BLANK")
+#   
+#   tot_weights <- r$nr_plus + r$nr_minus
+#   tot_sums <- round(r$sum_plus + r$sum_minus, 4)
+#   
+#   cat("\n")
+#   print(paste(rep("-",68), collapse= ""))
+#   printf("%s, ", assumption)
+#   printf("beta estimates a weighted sum of %d %ss.", r$nr_weights, treat)
+#   printf("%d %s receive a positive weight, and %d receive a negative weight.", r$nr_plus, treat, r$nr_minus)
+#   print(paste(rep("-",68), collapse= ""))
+#   
+#   ##Doulo
+#   print_out <- huxtable::hux(c(paste0("Treat. var: ", d),"Positive weights", "Negative weights", "Total")
+#                 ,c(paste0(treat, "s"), round(r$nr_plus, 2), round(r$nr_minus, 2), tot_weights),
+#                 c(paste0("\U03A3", " weights"), round(r$sum_plus, 4), round(r$sum_minus, 4), tot_sums),
+#                 add_colnames = FALSE
+#   )
+#   
+#   environment_res <- list(r$sum_minus, r$sensibility, r$beta)
+#   environment_names <- c("sum_neg_w", "lb_se_te", "beta")
+#   
+#   print_out = print_out %>% 
+#     huxtable::set_all_padding(4) %>% 
+#     huxtable::set_outer_padding(0) %>% 
+#     #set_number_format(2) %>% 
+#     huxtable::set_bottom_border(row = 1, col = huxtable::everywhere) %>% 
+#     huxtable::set_top_border(row = 1, col = huxtable::everywhere) %>% 
+#     huxtable::set_bottom_border(row = 3, col = huxtable::everywhere) %>% 
+#     huxtable::set_width(2) %>% 
+#     huxtable::set_align(huxtable::everywhere, 2:3, "center") %>% 
+#     huxtable::set_bold(1, huxtable::everywhere) %>% 
+#     huxtable::set_bottom_border(row = 4, col = huxtable::everywhere)
+#   
+#   colnames(print_out) = NULL
+#   huxtable::print_screen(print_out) 
+#   
+#   ###If we want to add the option export_excel
+#   # export_path  = "export_path.xlsx"
+#   # if(length(export_path)>0){
+#   #   quick_xlsx(print_out %>%set_width(1.5), file = export_path)
+#   # }
+#   
+#   if (!is.null(summary_measures)) {
+#       subscr <- substr(cmd_type, 1, 2)
+#       print("Summary Measures:")
+#       printf("TWFE Coefficient (\U03B2_%s): %.4f", subscr, twfe)
+#       printf("min \U03C3(\U0394) compatible with \U03B2_%s and \U0394_TR = 0: %.4f", subscr, r$sensibility)
+#     if (r$sum_minus < 0) {
+#       printf("min \U03C3(\U0394) compatible with \U03B2_%s and \U0394_TR of a different sign: %.4f", subscr, r$sensibility2)
+#       environment_res <- append(environment_res, r$sensibility2)
+#       environment_names <- c(environment_names, "lb_se_te2") 
+#     } 
+#     print("Reference: Corollary 1, de Chaisemartin, C and D'Haultfoeuille, X (2020a)")
+#   }
+#   
+#   if (length(random_weights) > 0) {
+#     cat("\n")
+#     print("Test random weights")
+#     print(r$mat)
+#     environment_res <- append(environment_res, r$mat)
+#     environment_names <- c(environment_names, "randomweightstest")
+#   }
+#   
+#   cat("\n")
+#   print("The development of this package was funded by the European Union (ERC, REALLYCREDIBLE,GA N. 101043899).")
+#   
+#   names(environment_res) <- environment_names
+#   list2env(environment_res, envir = .GlobalEnv) ## BIG OOF
+#   r$df_result
+# }
 
 # ##
 # # twowayfeweights_calculate_fetr_other_treatment
