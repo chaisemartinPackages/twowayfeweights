@@ -152,7 +152,7 @@
 #' # affected older versions of the commands.
 #' 
 #' @export
-twowayfeweights <- function(
+twowayfeweights = function(
     df,
     Y,
     G,
@@ -178,21 +178,21 @@ twowayfeweights <- function(
     stop("When the `other_treatments` argument is specified, you need to specify `type = 'feTR'` too.")
   }
   
-  controls_rename <- get_controls_rename(controls)
-  treatments_rename <- get_treatments_rename(other_treatments)
-  random_weight_rename <- get_random_weight_rename(test_random_weights)
+  controls_rename = get_controls_rename(controls)
+  treatments_rename = get_treatments_rename(other_treatments)
+  random_weight_rename = get_random_weight_rename(test_random_weights)
   
-  df_renamed <- twowayfeweights_rename_var(df, Y, G, T, D, D0, controls, other_treatments, test_random_weights)
-  df_transformed <- twowayfeweights_transform(df_renamed, controls_rename, weights, treatments_rename)
-  df_filtered <- twowayfeweights_filter(df_transformed, Y, G, T, D, D0, type, controls_rename, treatments_rename)
+  df_renamed = twowayfeweights_rename_var(df, Y, G, T, D, D0, controls, other_treatments, test_random_weights)
+  df_transformed = twowayfeweights_transform(df_renamed, controls_rename, weights, treatments_rename)
+  df_filtered = twowayfeweights_filter(df_transformed, Y, G, T, D, D0, type, controls_rename, treatments_rename)
 
-  res <- twowayfeweights_calculate(df_filtered, type = type, controls = controls_rename, treatments = treatments_rename)
+  res = twowayfeweights_calculate(df_filtered, type = type, controls = controls_rename, treatments = treatments_rename)
   if (is.null(other_treatments)) {
-    res <- twowayfeweights_result(res$df, res$beta, random_weight_rename)
-    # df_result <- twowayfeweights_print_results(type, res, D, summary_measures, res$beta, random_weight_rename)
+    res = twowayfeweights_result(res$df, res$beta, random_weight_rename)
+    # df_result = twowayfeweights_print_results(type, res, D, summary_measures, res$beta, random_weight_rename)
   } else {
-    res <- twowayfeweights_result_other_treatment(res$df, treatments_rename, res$beta, random_weight_rename)
-    # df_result <- twowayfeweights_print_result_other_treatment(res, treatments_rename, D, res$beta, random_weight_rename)
+    res = twowayfeweights_result_other_treatment(res$df, treatments_rename, res$beta, random_weight_rename)
+    # df_result = twowayfeweights_print_result_other_treatment(res, treatments_rename, D, res$beta, random_weight_rename)
   }
   
   # Set class and add extra features for post-processing (printing etc.)
