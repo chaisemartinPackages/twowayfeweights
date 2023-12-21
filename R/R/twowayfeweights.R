@@ -3,7 +3,7 @@
 #' @md
 #' @description Estimates the weights and measure of robustness to treatment
 #'   effect heterogeneity attached to two-way fixed effects regressions.
-#' @param df A data frame or data matrix.
+#' @param data A data frame or data matrix.
 #' @param Y Character string. The dependent variable in the regression. Y is the
 #'   level of the outcome if one wants to estimate the weights attached to the
 #'   fixed-effects regression, and Y is the first difference of the outcome if
@@ -129,21 +129,21 @@
 #' # The default `type = "feTR"` estimation strategy uses a fixed-effects
 #' # strategy under the assumption that parallel trends holds. 
 #' twowayfeweights(
-#'   wagepan,
-#'   "lwage", "nr", "year", "union",
-#'   type = "feTR", # default
-#'   summary_measures = TRUE,
-#'   test_random_weights = "educ"
+#'   wagepan,                        # input data
+#'   "lwage", "nr", "year", "union", # Y, G, T, & D
+#'   type                = "feTR",   # estimation type ("feTR" is the default)
+#'   summary_measures    = TRUE,     # show summary measures (optional)
+#'   test_random_weights = "educ"    # check randonmess of weights (optional)
 #' )
 #' 
 #' # The next line performs the same exercise using first differences of outcome
 #' # and treatment:
 #' twowayfeweights(
 #'   wagepan,
-#'   "diff_lwage", "nr", "year", "diff_union", 
-#'   type = "fdTR",
-#'   D0 = "union",
-#'   summary_measures = TRUE,
+#'   "diff_lwage", "nr", "year", "diff_union", # Y & D changed to differenced versions
+#'   type                = "fdTR",             # changed
+#'   D0                  = "union",            # added (D0 is req'd for type="fdTR")
+#'   summary_measures    = TRUE,
 #'   test_random_weights = "educ"
 #' )
 #' 
@@ -153,7 +153,7 @@
 #' 
 #' @export
 twowayfeweights = function(
-    df,
+    data,
     Y,
     G,
     T,
@@ -182,18 +182,33 @@ twowayfeweights = function(
   treatments_rename = get_treatments_rename(other_treatments)
   random_weight_rename = get_random_weight_rename(test_random_weights)
   
-  df_renamed = twowayfeweights_rename_var(df, Y, G, T, D, D0, controls, other_treatments, test_random_weights)
-  df_transformed = twowayfeweights_transform(df_renamed, controls_rename, weights, treatments_rename)
-  df_filtered = twowayfeweights_filter(df_transformed, Y, G, T, D, D0, type, controls_rename, treatments_rename)
+  data_renamed = twowayfeweights_rename_var(data, Y, G, T, D, D0, controls, other_treatments, test_random_weights)
+  data_transformed = twowayfeweights_transform(data_renamed, controls_rename, weights, treatments_rename)
+  data_filtered = twowayfeweights_filter(data_transformed, Y, G, T, D, D0, type, controls_rename, treatments_rename)
 
-  res = twowayfeweights_calculate(df_filtered, type = type, controls = controls_rename, treatments = treatments_rename)
-  if (is.null(other_treatments)) {
-    res = twowayfeweights_result(res$df, res$beta, random_weight_rename)
-    # df_result = twowayfeweights_print_results(type, res, D, summary_measures, res$beta, random_weight_rename)
-  } else {
-    res = twowayfeweights_result_other_treatment(res$df, treatments_rename, res$beta, random_weight_rename)
-    # df_result = twowayfeweights_print_result_other_treatment(res, treatments_rename, D, res$beta, random_weight_rename)
-  }
+  # Calculate the weights
+  res = twowayfeweights_calculate(
+    dat        = data_filtered,
+    type       = type,
+    controls   = controls_rename,
+    treatments = treatments_rename
+  )
+  
+  # Create main return object list
+  res = twowayfeweights_result(
+    dat            = res$dat,
+    beta           = res$beta,
+    random_weights = random_weight_rename,
+    treatments     = treatments_rename
+  )
+  
+  # if (is.null(other_treatments)) {
+  #   res = twowayfeweights_result(res$dat, res$beta, random_weight_rename)
+  #   # data_result = twowayfeweights_print_results(type, res, D, summary_measures, res$beta, random_weight_rename)
+  # } else {
+  #   res = twowayfeweights_result_other_treatment(res$dat, treatments_rename, res$beta, random_weight_rename)
+  #   # data_result = twowayfeweights_print_result_other_treatment(res, treatments_rename, D, res$beta, random_weight_rename)
+  # }
   
   # Set class and add extra features for post-processing (printing etc.)
   class(res) = "twowayfeweights"
@@ -201,11 +216,12 @@ twowayfeweights = function(
   res$type = type
   res$params = list(Y = Y, G = G, T = T, D = D, D0 = D0)
   res$summary_measures = summary_measures
+  res$other_treatments = treatments_rename
   res$random_weights = random_weight_rename
   
   
   if (!is.null(path)) {
-    write.csv(df_result, path, row.names = FALSE)
+    write.csv(res$dat_result, path, row.names = FALSE)
   }
   
   return(res)

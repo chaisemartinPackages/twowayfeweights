@@ -5,7 +5,7 @@
 \title{Estimation of the weights attached to the two-way fixed effects regressions.}
 \usage{
 twowayfeweights(
-  df,
+  data,
   Y,
   G,
   T,
@@ -21,7 +21,7 @@ twowayfeweights(
 )
 }
 \arguments{
-\item{df}{A data frame or data matrix.}
+\item{data}{A data frame or data matrix.}
 
 \item{Y}{Character string. The dependent variable in the regression. Y is the
 level of the outcome if one wants to estimate the weights attached to the
@@ -170,21 +170,21 @@ library(TwoWayFEWeights)
 # The default `type = "feTR"` estimation strategy uses a fixed-effects
 # strategy under the assumption that parallel trends holds. 
 twowayfeweights(
-  wagepan,
-  "lwage", "nr", "year", "union",
-  type = "feTR", # default
-  summary_measures = TRUE,
-  test_random_weights = "educ"
+  wagepan,                        # input data
+  "lwage", "nr", "year", "union", # Y, G, T, & D
+  type                = "feTR",   # estimation type ("feTR" is the default)
+  summary_measures    = TRUE,     # show summary measures (optional)
+  test_random_weights = "educ"    # check randonmess of weights (optional)
 )
 
 # The next line performs the same exercise using first differences of outcome
 # and treatment:
 twowayfeweights(
   wagepan,
-  "diff_lwage", "nr", "year", "diff_union", 
-  type = "fdTR",
-  D0 = "union",
-  summary_measures = TRUE,
+  "diff_lwage", "nr", "year", "diff_union", # Y & D changed to differenced versions
+  type                = "fdTR",             # changed
+  D0                  = "union",            # added (D0 is req'd for type="fdTR")
+  summary_measures    = TRUE,
   test_random_weights = "educ"
 )
 

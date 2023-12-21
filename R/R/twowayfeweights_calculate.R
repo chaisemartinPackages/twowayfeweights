@@ -197,7 +197,7 @@ twowayfeweights_calculate = function(
   }
   
   
-  return(list(df = dat, beta = beta))
+  return(list(dat = dat, beta = beta))
   
 }
   
