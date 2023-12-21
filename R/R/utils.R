@@ -208,130 +208,90 @@ twowayfeweights_test_random_weights <- function(df, random_weights) {
   return(mat)
 }
 
-twowayfeweights_result <- function(df, beta, random_weights) {
-  
-  .data = NULL
-
-  # Avoid overcounting of positive and negative weights close to 0
-  limit_sensitivity <- 10^(-10)
-  df$weight_result <- ifelse(df$weight_result < limit_sensitivity & df$weight_result > -limit_sensitivity, 0, df$weight_result)
-  ret <- twowayfeweights_summarize_weights(df, "weight_result")
-
-  W_mean <- weighted.mean(df$W, df$nat_weight)
-  # Modif. Diego: DoF adjustment to the sd of w_gt
-  M <- sum(df$nat_weight != 0)
-  W_sd <- sqrt(sum(df$nat_weight * (df$W - W_mean)^2, na.rm = TRUE)) * sqrt(M/(M - 1))
-  sensibility <- abs(beta) / W_sd
-  
-  df_result <- df %>% 
-    dplyr::select(.data$T, .data$G, .data$weight_result) %>% 
-    dplyr::rename(weight = .data$weight_result)
-  
-  ret$df_result = df_result
-  ret$beta = beta
-  ret$sensibility = sensibility
-  if (length(random_weights) > 0) {
-    ret$mat = twowayfeweights_test_random_weights(df, random_weights)
-  }
-  
-  if (ret$sum_minus < 0) {
-    df_sens <- df %>%
-      dplyr::filter(.data$weight_result != 0) %>%
-      dplyr::arrange(dplyr::desc(.data$W)) %>% 
-      dplyr::mutate(P_k = 0, S_k = 0, T_k = 0)
-    
-    # Modif. Diego: Replaced the previous two loops with build-in routines
-    N = nrow(df_sens)
-    df_sens <- df_sens[order(df_sens$W, -df_sens$G, -df_sens$T),]
-    df_sens$Wsq <- df_sens$nat_weight * df_sens$W^2
-    df_sens$P_k <- cumsum(df_sens$nat_weight) 
-    df_sens$S_k <- cumsum(df_sens$weight_result) 
-    df_sens$T_k <- cumsum(df_sens$Wsq) 
-    df_sens <- df_sens[order(-df_sens$W, df_sens$G, df_sens$T),]
-    df_sens <- df_sens %>% 
-      dplyr::mutate(sens_measure2 = abs(beta) / sqrt(.data$T_k + .data$S_k^2 / (1 - .data$P_k))) %>%
-      dplyr::mutate(indicator = as.numeric(.data$W < - .data$S_k / (1 - .data$P_k)))
-    df_sens$indicator[1] = 0
-    df_sens <- df_sens %>%
-      dplyr::mutate(indicator_l = dplyr::lag(.data$indicator, default = -1))
-    df_sens <- df_sens %>%
-      dplyr::rowwise() %>%
-      dplyr::mutate(indicator=max(.data$indicator, .data$indicator_l))
-    total_indicator <- sum(df_sens$indicator)
-    sensibility2 <- df_sens$sens_measure2[N - total_indicator + 1]
-    ret$sensibility2 = sensibility2
-  }
-  return(ret)
-  
-}
-
+# twowayfeweights_result <- function(df, beta, random_weights) {
+#   
+#   .data = NULL
+# 
+#   # Avoid overcounting of positive and negative weights close to 0
+#   limit_sensitivity <- 10^(-10)
+#   df$weight_result <- ifelse(df$weight_result < limit_sensitivity & df$weight_result > -limit_sensitivity, 0, df$weight_result)
+#   ret <- twowayfeweights_summarize_weights(df, "weight_result")
+# 
+#   W_mean <- weighted.mean(df$W, df$nat_weight)
+#   # Modif. Diego: DoF adjustment to the sd of w_gt
+#   M <- sum(df$nat_weight != 0)
+#   W_sd <- sqrt(sum(df$nat_weight * (df$W - W_mean)^2, na.rm = TRUE)) * sqrt(M/(M - 1))
+#   sensibility <- abs(beta) / W_sd
+#   
+#   df_result <- df %>% 
+#     dplyr::select(.data$T, .data$G, .data$weight_result) %>% 
+#     dplyr::rename(weight = .data$weight_result)
+#   
+#   ret$df_result = df_result
+#   ret$beta = beta
+#   ret$sensibility = sensibility
+#   if (length(random_weights) > 0) {
+#     ret$mat = twowayfeweights_test_random_weights(df, random_weights)
+#   }
+#   
+#   if (ret$sum_minus < 0) {
+#     df_sens <- df %>%
+#       dplyr::filter(.data$weight_result != 0) %>%
+#       dplyr::arrange(dplyr::desc(.data$W)) %>% 
+#       dplyr::mutate(P_k = 0, S_k = 0, T_k = 0)
+#     
+#     # Modif. Diego: Replaced the previous two loops with build-in routines
+#     N = nrow(df_sens)
+#     df_sens <- df_sens[order(df_sens$W, -df_sens$G, -df_sens$T),]
+#     df_sens$Wsq <- df_sens$nat_weight * df_sens$W^2
+#     df_sens$P_k <- cumsum(df_sens$nat_weight) 
+#     df_sens$S_k <- cumsum(df_sens$weight_result) 
+#     df_sens$T_k <- cumsum(df_sens$Wsq) 
+#     df_sens <- df_sens[order(-df_sens$W, df_sens$G, df_sens$T),]
+#     df_sens <- df_sens %>% 
+#       dplyr::mutate(sens_measure2 = abs(beta) / sqrt(.data$T_k + .data$S_k^2 / (1 - .data$P_k))) %>%
+#       dplyr::mutate(indicator = as.numeric(.data$W < - .data$S_k / (1 - .data$P_k)))
+#     df_sens$indicator[1] = 0
+#     df_sens <- df_sens %>%
+#       dplyr::mutate(indicator_l = dplyr::lag(.data$indicator, default = -1))
+#     df_sens <- df_sens %>%
+#       dplyr::rowwise() %>%
+#       dplyr::mutate(indicator=max(.data$indicator, .data$indicator_l))
+#     total_indicator <- sum(df_sens$indicator)
+#     sensibility2 <- df_sens$sens_measure2[N - total_indicator + 1]
+#     ret$sensibility2 = sensibility2
+#   }
+#   return(ret)
+#   
+# }
+# 
 # ##
-# # twowayfeweights_calculate_fetr_other_treatment
-# twowayfeweights_calculate_fetr_other_treatment <- function(df, controls, treatments) {
-#   mean_D <- weighted.mean(df$D, df$weights, na.rm = TRUE)
-#   obs <- sum(df$weights)
-#   gdf <- df %>% dplyr::group_by(.data$G, .data$T) %>% dplyr::summarise(P_gt = sum(.data$weights))
-#   df <- df %>% 
-#     dplyr::left_join(gdf, by=c("T", "G")) %>% 
-#     dplyr::mutate(P_gt = .data$P_gt / obs) %>% 
-#     dplyr::mutate(nat_weight = .data$P_gt * .data$D / mean_D)
+# #twowayfeweights_result_other_treatment
+# twowayfeweights_result_other_treatment <- function(df, treatments, beta, random_weights) {
 #   
-#   vars = c(controls, treatments)
-#   formula = paste(vars, collapse = " + ")
-#   formula = paste("D ~ ", formula, sep = "")
-#   formula = paste(formula, " | G + Tfactor", sep = "")
-#   denom.lm <- fixest::feols(as.formula(formula), data = df, weights = df$weights)
-#   df$eps_1 <- df$D - predict(denom.lm, df)
-#   df$eps_1_E_D_gt <- df$eps_1 * df$D
-#   denom_W <- mean(df$eps_1_E_D_gt, na.rm = TRUE)
+#   .data = NULL
 #   
-#   df <- df %>% 
-#     dplyr::mutate(W = .data$eps_1 * mean_D / denom_W) %>% 
-#     dplyr::mutate(weight_result = .data$W * .data$nat_weight)
+#   columns <- c("T", "G", "weight_result")
+#   ret <- twowayfeweights_summarize_weights(df, "weight_result")
+#   
+#   if (length(random_weights) > 0) {
+#     ret$mat = twowayfeweights_test_random_weights(df, random_weights)
+#   }
 #   
 #   for (treatment in treatments) {
 #     varname = fn_treatment_weight_rename(treatment)
-#     df <- df %>% dplyr::mutate(!!rlang::sym(varname) := .data$W * .data$P_gt * !!rlang::sym(treatment) / mean_D)
+#     columns <- c(columns, varname)
+#     ret2 <- twowayfeweights_summarize_weights(df, varname)
+#     ret[[treatment]] <- ret2
 #   }
+#   df_result <- df %>% 
+#     dplyr::select_at(dplyr::vars(columns)) %>% 
+#     dplyr::rename(weight = .data$weight_result)
 #   
-#   df <- df %>% dplyr::select(-.data$eps_1, -.data$P_gt)
-#   
-#   formula = paste(vars, collapse = " + ")
-#   formula = paste("Y ~ D + ", formula, sep = "")
-#   formula = paste(formula, " | G + Tfactor", sep = "")
-#   beta.lm <- fixest::feols(as.formula(formula), data = df, weights = df$weights)
-#   beta <- as.numeric(coef(beta.lm)["D"])
-#   
-#   return(list(df = df, beta = beta))
+#   ret$beta = beta
+#   ret[["df_result"]] <- df_result
+#   return(ret)
 # }
-
-##
-#twowayfeweights_result_other_treatment
-twowayfeweights_result_other_treatment <- function(df, treatments, beta, random_weights) {
-  
-  .data = NULL
-  
-  columns <- c("T", "G", "weight_result")
-  ret <- twowayfeweights_summarize_weights(df, "weight_result")
-  
-  if (length(random_weights) > 0) {
-    ret$mat = twowayfeweights_test_random_weights(df, random_weights)
-  }
-  
-  for (treatment in treatments) {
-    varname = fn_treatment_weight_rename(treatment)
-    columns <- c(columns, varname)
-    ret2 <- twowayfeweights_summarize_weights(df, varname)
-    ret[[treatment]] <- ret2
-  }
-  df_result <- df %>% 
-    dplyr::select_at(dplyr::vars(columns)) %>% 
-    dplyr::rename(weight = .data$weight_result)
-  
-  ret$beta = beta
-  ret[["df_result"]] <- df_result
-  return(ret)
-}
 
 
 ##
