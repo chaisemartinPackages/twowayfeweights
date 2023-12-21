@@ -23,7 +23,8 @@ print.twowayfeweights = function(x, ...) {
     sprintf("beta estimates a weighted sum of %d %ss.", x$nr_weights, treat), 
     sep = ""
   )
-  hwidth = min(80, nchar(assumption_string))
+  # hwidth = min(80, nchar(assumption_string))
+  hwidth = nchar(assumption_string)
   
   tot_weights = x$nr_plus + x$nr_minus
   tot_sums = round(x$sum_plus + x$sum_minus, 4)
