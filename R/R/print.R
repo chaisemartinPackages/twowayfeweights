@@ -28,7 +28,7 @@ print.twowayfeweights = function(x, ...) {
   
   tot_weights = x$nr_plus + x$nr_minus
   tot_sums = round(x$sum_plus + x$sum_minus, 4)
-  weight_string = sprintf("%d %s receive a positive weight, and %d receive a negative weight.", x$nr_plus, treat, x$nr_minus)
+  weight_string = sprintf("%d %ss receive a positive weight, and %d receive a negative weight.", x$nr_plus, treat, x$nr_minus)
   
   # cat("\n")
   # # cat(rep("\u2500", hwidth), sep = "")
@@ -52,7 +52,8 @@ print.twowayfeweights = function(x, ...) {
   # cat("\n\n")
   
   tmat = cbind(
-    c(round(x$nr_plus, 2), round(x$nr_minus, 2), tot_weights),
+    # c(round(x$nr_plus, 2), round(x$nr_minus, 2), tot_weights),
+    c(x$nr_plus, x$nr_minus, tot_weights),
     c(round(x$sum_plus, 4), round(x$sum_minus, 4), tot_sums)
   )
   # colnames(tmat) = c(paste0(treat, "s"), paste0("\U03A3", " weights"))
