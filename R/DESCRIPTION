@@ -21,10 +21,11 @@ Depends: R(>= 3.4.0)
 Imports:
   dplyr,
   magrittr,
+  cli,
   huxtable,
   fixest,
-  stats,
   rlang,
+  stats,
   utils
 Suggests:
   haven
