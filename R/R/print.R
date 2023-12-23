@@ -30,16 +30,16 @@ print.twowayfeweights = function(x, ...) {
   tot_sums = round(x$sum_plus + x$sum_minus, 4)
   weight_string = sprintf("%d %s receive a positive weight, and %d receive a negative weight.", x$nr_plus, treat, x$nr_minus)
   
-  cat("\n")
-  # cat(rep("\u2500", hwidth), sep = "")
-  cat(cli::rule())
-  cat("\n")
+  # cat("\n")
+  # # cat(rep("\u2500", hwidth), sep = "")
+  # cat(cli::rule())
+  # cat("\n")
   cat(assumption_string)
   cat("\n")
   cat(weight_string)
-  cat("\n")
-  # cat(rep("\u2500", hwidth), sep = "")
-  cat(cli::rule())
+  # cat("\n")
+  # # cat(rep("\u2500", hwidth), sep = "")
+  # cat(cli::rule())
   cat("\n\n")
   
   weight_string = sprintf("%d %s receive a positive weight, and %d receive a negative weight.", x$nr_plus, treat, x$nr_minus)
@@ -74,11 +74,11 @@ print.twowayfeweights = function(x, ...) {
 
   if (!is.null(x$random_weights)) {
     # cat("\nTest random weights:\n")
-    cat(cli::style_bold("\nTest random weights:\n"))
+    cat(cli::style_bold("\nTest random assignment of weights:\n"))
     print(x$mat)
   }
   
-  cat("\n")
+  cat("\n\n")
   # cat("The development of this package was funded by the European Union (ERC, REALLYCREDIBLE,GA N. 101043899).", "\n")
   cat(cli::style_italic("The development of this package was funded by the European Union (ERC, REALLYCREDIBLE,GA N. 101043899).", "\n"))
   cat("\n")
