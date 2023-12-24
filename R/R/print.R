@@ -7,6 +7,8 @@
 #' @export
 print.twowayfeweights = function(x, ...) {
   
+  other_treats = !is.null(x$other_treatments)
+  
   treat = if (x$type %in% c("feTR", "fdTR")) {
       "ATT"
     } else if (x$type %in% c("feS", "fdS")) {
@@ -18,31 +20,57 @@ print.twowayfeweights = function(x, ...) {
   } else if (treat=="LATE") {
     "Under the common trends, treatment monotonicity, and if groups' treatment effect does not change over time"
   } else "BLANK"
-  assumption_string = paste(
-    assumption, ", ", 
-    sprintf("beta estimates a weighted sum of %d %ss.", x$nr_weights, treat), 
-    sep = ""
+  
+  if (other_treats) {
+    assumption_string = paste(
+      assumption, ", ",
+      "beta estimates the sum of several terms.\n\n",
+      sprintf("The first term is a weighted sum of %d %ss.", x$nr_weights, treat), 
+      sep = ""
+    )
+  } else {
+    assumption_string = paste(
+      assumption, ", ", 
+      sprintf("beta estimates a weighted sum of %d %ss.", x$nr_weights, treat), 
+      sep = ""
+    )
+  } 
+  
+  weight_string = sprintf(
+    "%d %ss receive a positive weight, and %d receive a negative weight.",
+    x$nr_plus,
+    treat,
+    x$nr_minus
   )
+  
+  otreat_string = NULL
+  if (other_treats) {
+    otreat_string = paste0(
+      "These weighting are due to the primary treatment, \"",
+      x$params$D, 
+      "\"."
+    )
+  }
+  
   # hwidth = min(80, nchar(assumption_string))
-  hwidth = nchar(assumption_string)
+  # hwidth = nchar(assumption_string)
   
   tot_weights = x$nr_plus + x$nr_minus
   tot_sums = round(x$sum_plus + x$sum_minus, 4)
-  weight_string = sprintf("%d %ss receive a positive weight, and %d receive a negative weight.", x$nr_plus, treat, x$nr_minus)
   
   # cat("\n")
-  # # cat(rep("\u2500", hwidth), sep = "")
   # cat(cli::rule())
   # cat("\n")
   cat(assumption_string)
   cat("\n")
   cat(weight_string)
-  # cat("\n")
-  # # cat(rep("\u2500", hwidth), sep = "")
+  cat("\n")
+  if (other_treats) {
+    cat(otreat_string)
+    cat("\n")
+  }
   # cat(cli::rule())
-  cat("\n\n")
-  
-  weight_string = sprintf("%d %s receive a positive weight, and %d receive a negative weight.", x$nr_plus, treat, x$nr_minus)
+  cat("\n")
   
   # header_string = capture.output(
   #   cat(assumption_string, "\n"),
@@ -52,7 +80,6 @@ print.twowayfeweights = function(x, ...) {
   # cat("\n\n")
   
   tmat = cbind(
-    # c(round(x$nr_plus, 2), round(x$nr_minus, 2), tot_weights),
     c(x$nr_plus, x$nr_minus, tot_weights),
     c(round(x$sum_plus, 4), round(x$sum_minus, 4), tot_sums)
   )
@@ -62,43 +89,100 @@ print.twowayfeweights = function(x, ...) {
   # print(tmat, quote = FALSE, print.gap = 2L, right = TRUE)
   print_treat_matrix(tmat = tmat, tvar = x$params$D, ttype = treat)
   
+  
+  # print other treatments
+  if (other_treats) {
+    for (otvar in x$other_treatments) {
+      
+      ox = x[[otvar]]
+      
+      otot_weights = ox$nr_plus + ox$nr_minus
+      otot_sums = round(ox$sum_plus + ox$sum_minus, 4)
+      
+      otmat = cbind(
+        # c(round(x$nr_plus, 2), round(x$nr_minus, 2), tot_weights),
+        c(ox$nr_plus, ox$nr_minus, otot_weights),
+        c(round(ox$sum_plus, 4), round(ox$sum_minus, 4), tot_sums)
+      )
+      
+      oassumption_string = sprintf("The next term is a weighted sum of %d %ss.", ox$nr_weights, treat)
+      # of treatment OT_treat2 included in the other_treatments option.
+      oweight_string = sprintf(
+        "%d %ss receive a positive weight, and %d receive a negative weight.",
+        ox$nr_plus,
+        treat,
+        ox$nr_minus
+      )
+      otreat_string = paste0(
+        "These weighting are due to the additional treatment, \"",
+        gsub("^OT_", "", otvar), 
+        "\"."
+      )
+      
+      cat("\n\n")
+      cat(oassumption_string)
+      cat("\n")
+      cat(oweight_string)
+      cat("\n")
+      cat(otreat_string)
+      cat("\n\n")
+      print_treat_matrix(tmat = otmat, tvar = otvar, ttype = treat, otreat = TRUE)
+      
+    }
+  }
+  
+  # print summary measures
   if (isTRUE(x$summary_measures)) {
     subscr = substr(x$type, 1, 2)
-    # cat("\nSummary Measures:\n")
-    cat(cli::style_bold("\nSummary Measures:\n"))
-    cat(sprintf("  TWFE Coefficient (\U03B2_%s): %.4f", subscr, x$beta), "\n")
-    cat(sprintf("  min \U03C3(\U0394) compatible with \U03B2_%s and \U0394_TR = 0: %.4f", subscr, x$sensibility), "\n")
-    if (x$sum_minus < 0) {
-      cat(sprintf("  min \U03C3(\U0394) compatible with \U03B2_%s and \U0394_TR of a different sign: %.4f", subscr, x$sensibility2), "\n")
+    cat("\n\n")
+    cat(cli::style_bold("Summary Measures:"))
+    cat("\n")
+    cat(sprintf("  TWFE Coefficient (\U03B2_%s): %.4f", subscr, x$beta))
+    if (!is.null(x$sensibility)) {
+      cat("\n")
+      cat(sprintf("  min \U03C3(\U0394) compatible with \U03B2_%s and \U0394_TR = 0: %.4f", subscr, x$sensibility))
+    }
+    if (!is.null(x$sensibility2) && x$sum_minus < 0) {
+      cat("\n")
+      cat(sprintf("  min \U03C3(\U0394) compatible with \U03B2_%s and \U0394_TR of a different sign: %.4f", subscr, x$sensibility2))
     }
   }
 
+  #print random weights
   if (!is.null(x$random_weights)) {
-    # cat("\nTest random weights:\n")
-    cat(cli::style_bold("\nTest random assignment of weights:\n"))
+    cat("\n\n")
+    cat(cli::style_bold("Test random assignment of weights:"))
+    cat("\n")
     print(x$mat)
   }
   
   cat("\n\n")
   # cat("The development of this package was funded by the European Union (ERC, REALLYCREDIBLE,GA N. 101043899).", "\n")
-  cat(cli::style_italic("The development of this package was funded by the European Union (ERC, REALLYCREDIBLE,GA N. 101043899).", "\n"))
-  cat("\n")
+  cat(cli::style_italic("The development of this package was funded by the European Union (ERC, REALLYCREDIBLE,GA N. 101043899)."))
+  cat("\n\n")
   
   return(invisible(x))
 }
 
 
 ## Custom print print method for treatment matrix
-print_treat_matrix = function(tmat, tvar, ttype) {
+print_treat_matrix = function(tmat, tvar, ttype, otreat = FALSE) {
 
   # Prep matrix (add row and column headers)
   tmat = cbind(
     c("Positive weights", "Negative weights", "Total"),
     tmat
   )
+  
+  if (otreat) {
+    tstring = paste0("Other treat.: ", gsub("^OT_", "", tvar))
+  } else {
+    tstring = paste0("Treat. var: ", tvar)
+  }
+  
   tmat = rbind(
     c(
-      paste0("Treat. var: ", tvar),
+      tstring,
       paste0(ttype, "s"),
       paste0("\U03A3", " weights")
     ),
@@ -117,7 +201,7 @@ print_treat_matrix = function(tmat, tvar, ttype) {
         sprintf("%*s", width, x)   # Right-align all other columns
       }
     }, row, col_widths, seq_along(row))
-    paste(formatted_elements, collapse = "  ")
+    paste(formatted_elements, collapse = "    ")
   }
   
   # Create the header and separator line
@@ -148,6 +232,6 @@ print_treat_matrix = function(tmat, tvar, ttype) {
   cat(format_row(tmat[nrow(tmat), ]), "\n")
   # Print separator line after last row
   # cat(separator_line, "\n", sep = "")
-  cat(cli::rule(width = separator_line_width), "\n")
+  cat(cli::rule(width = separator_line_width))
   
 }
