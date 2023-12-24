@@ -4,12 +4,15 @@ Title: Estimation of the Weights Attached to the Two-Way Fixed Effects
         Regressions
 Version: 2.0.0
 Authors@R: 
-    c(person("Diego", "Ciccia", role = c("aut", "cre"), email = "diego.ciccia@sciencespo.fr"),
-	person("Felix", "Knau", role = "aut", email = "felix.knau@sciencespo.fr"),
-	person("Mélitine", "Malezieux", role = "aut", email = "melitine.malezieux@sciencespo.fr"),	
-	person("Doulo", "Sow", role = "aut", email = "doulo.sow@ensae.fr"),
-	person("Shuo", "Zhang", role = "aut", email = "shuo_zhang@ucsb.edu"),
-      	person("Clément", "de Chaisemartin", role = "aut", email = "clement.dechaisemartin@sciencespo.fr"))
+    c(
+    person("Diego", "Ciccia", role = c("aut", "cre"), email = "diego.ciccia@sciencespo.fr"),
+    person("Felix", "Knau", role = "aut", email = "felix.knau@sciencespo.fr"),
+    person("Mélitine", "Malezieux", role = "aut", email = "melitine.malezieux@sciencespo.fr"),	
+    person("Doulo", "Sow", role = "aut", email = "doulo.sow@ensae.fr"),
+    person("Shuo", "Zhang", role = "aut", email = "shuo_zhang@ucsb.edu"),
+    person("Clément", "de Chaisemartin", role = "aut", email = "clement.dechaisemartin@sciencespo.fr"),
+    person("McDermott", "Grant", role = "ctb", email = "gmcd@amazon.com")
+    )
 Maintainer: Diego Ciccia <diego.ciccia@sciencespo.fr>
 Description: 
     Estimates the weights and measure of robustness to treatment effect heterogeneity attached to two-way fixed effects regressions.
@@ -35,5 +38,4 @@ Author: Diego Ciccia [aut, cre],
 	Doulo Sow [aut],
 	Shuo Zhang [aut],
   	Clément de Chaisemartin [aut]
-Packaged: 2023-12-04 13:46:56 UTC; 39380
-RoxygenNote: 7.2.3.9000
+RoxygenNote: 7.2.3
