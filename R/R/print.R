@@ -52,9 +52,6 @@ print.twowayfeweights = function(x, ...) {
     )
   }
   
-  # hwidth = min(80, nchar(assumption_string))
-  # hwidth = nchar(assumption_string)
-  
   tot_weights = x$nr_plus + x$nr_minus
   tot_sums = round(x$sum_plus + x$sum_minus, 4)
   
@@ -72,17 +69,11 @@ print.twowayfeweights = function(x, ...) {
   # cat(cli::rule())
   cat("\n")
   
-  # header_string = capture.output(
-  #   cat(assumption_string, "\n"),
-  #   cat(weight_string)
-  # )
-  # cli::cat_boxx(header_string)
-  # cat("\n\n")
-  
   tmat = cbind(
     c(x$nr_plus, x$nr_minus, tot_weights),
     c(round(x$sum_plus, 4), round(x$sum_minus, 4), tot_sums)
   )
+  ## Rather use custom print method defined below
   # colnames(tmat) = c(paste0(treat, "s"), paste0("\U03A3", " weights"))
   # rownames(tmat) = c("Positive weights", "Negative weights", "Total")
   # cat(paste0("Treat. var: ", x$params$D), "\n")
@@ -100,13 +91,11 @@ print.twowayfeweights = function(x, ...) {
       otot_sums = round(ox$sum_plus + ox$sum_minus, 4)
       
       otmat = cbind(
-        # c(round(x$nr_plus, 2), round(x$nr_minus, 2), tot_weights),
         c(ox$nr_plus, ox$nr_minus, otot_weights),
         c(round(ox$sum_plus, 4), round(ox$sum_minus, 4), tot_sums)
       )
       
       oassumption_string = sprintf("The next term is a weighted sum of %d %ss.", ox$nr_weights, treat)
-      # of treatment OT_treat2 included in the other_treatments option.
       oweight_string = sprintf(
         "%d %ss receive a positive weight, and %d receive a negative weight.",
         ox$nr_plus,
@@ -157,7 +146,6 @@ print.twowayfeweights = function(x, ...) {
   }
   
   cat("\n\n")
-  # cat("The development of this package was funded by the European Union (ERC, REALLYCREDIBLE,GA N. 101043899).", "\n")
   cat(cli::style_italic("The development of this package was funded by the European Union (ERC, REALLYCREDIBLE,GA N. 101043899)."))
   cat("\n\n")
   
@@ -207,17 +195,14 @@ print_treat_matrix = function(tmat, tvar, ttype, otreat = FALSE) {
   # Create the header and separator line
   header = format_row(tmat[1, ])
   bold_header = cli::style_bold(header)
-  # separator_line = paste(rep("─", nchar(header)), collapse = "")
   # Calculate the separator line width
   separator_line_width = nchar(header)
   
   # Print separator line before header
-  # cat(separator_line, "\n", sep = "")
   cat(cli::rule(width = separator_line_width), "\n")
   # Print the bold header
   cat(bold_header, "\n")
   # Print separator line after header
-  # cat(separator_line, "\n", sep = "")
   cat(cli::rule(width = separator_line_width), "\n")
   
   # Print the body of the matrix except the last row
@@ -226,12 +211,10 @@ print_treat_matrix = function(tmat, tvar, ttype, otreat = FALSE) {
   }
   
   # Print separator line before last row
-  # cat(separator_line, "\n", sep = "")
   cat(cli::rule(width = separator_line_width), "\n")
   # Print the last row
   cat(format_row(tmat[nrow(tmat), ]), "\n")
   # Print separator line after last row
-  # cat(separator_line, "\n", sep = "")
   cat(cli::rule(width = separator_line_width))
   
 }
