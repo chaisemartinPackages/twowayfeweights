@@ -22,7 +22,6 @@ Imports:
   dplyr,
   magrittr,
   cli,
-  huxtable,
   fixest,
   rlang,
   stats,
