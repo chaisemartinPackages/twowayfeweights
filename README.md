@@ -11,8 +11,8 @@ ssc install twowayfeweights, replace
 
 R (GitHub) *CRAN coming soon*:
 ```s
-library(devtools)
-install_github("chaisemartinPackages/twowayfeweights/R")
+# install.packages("remotes")
+remotes::install_github("chaisemartinPackages/twowayfeweights/R")
 ```
 
 ## Syntax
@@ -89,7 +89,7 @@ Run the following line to download the dataset in your local working directory a
 ```r
 library(TwoWayFEWeights)
 
-## We need the haven package to read in the dta. file in this example
+## We need the haven package to read in the .dta file in this example
 # install.packages("haven")
 
 url = "https://raw.githubusercontent.com/chaisemartinPackages/twowayfeweights/main/wagepan_twfeweights.dta"
@@ -100,7 +100,7 @@ The next line estimates the weights from a TWFE regression of log wage (Y) on un
 
 ```r
 est = twowayfeweights(
-  wagepan,                        # data
+  wagepan,                        # dataset
   "lwage", "nr", "year", "union", # Required Y, G, T, and D args
   type                = "feTR",   # start of optional args...
   summary_measures    = TRUE,
@@ -113,9 +113,9 @@ The next line performs the same exercise using first differences of outcome and 
 ```
 est2 = twowayfeweights(
   wagepan,
-  "diff_lwage", "nr", "year", "diff_union",
-  type                = "fdTR",
-  D0                  = "union",
+  "diff_lwage", "nr", "year", "diff_union", # use differenced versions of Y and D
+  type                = "fdTR",             # changed
+  D0                  = "union",            # added (req'd arg for fdTR type)
   summary_measures    = TRUE,
   test_random_weights = "educ"
 )
@@ -138,6 +138,7 @@ Please note that the number of negative weights could be different from Section 
 + Shuo Zhang, University of California at Santa Barbara, Santa Barbara, California, USA.
 + Clément de Chaisemartin, Economics Department, Sciences Po, France.
 + Xavier D'Haultfoeuille, CREST, Palaiseau, France.
++ Grant McDermott, Amazon Inc., USA.
 
 The development of this package was funded by the European Union (ERC, REALLYCREDIBLE,GA N°101043899).
 
