@@ -110,7 +110,7 @@ est = twowayfeweights(
 
 The next line performs the same exercise using first differences of outcome and treatment:
 
-```
+```r
 est2 = twowayfeweights(
   wagepan,
   "diff_lwage", "nr", "year", "diff_union", # use differenced versions of Y and D
