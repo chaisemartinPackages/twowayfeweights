@@ -1,4 +1,0 @@
-\name{twowayfeweights_calculate_fetr_other_treatment}
-\alias{twowayfeweights_calculate_fetr_other_treatment}
-\title{twowayfeweights_calculate_fetr_other_treatment}
-\description{Internal function/object - twowayfeweights}
