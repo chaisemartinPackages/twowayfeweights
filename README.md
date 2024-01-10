@@ -9,7 +9,7 @@ Estimates the weights attached to the two-way fixed effects regressions studied 
 ssc install twowayfeweights, replace
 ```
 
-### R:
+### R (CRAN):
 
 ```s
 install.packages("TwoWayFEWeights")
