@@ -4,15 +4,15 @@ Estimates the weights attached to the two-way fixed effects regressions studied 
 
 ## Setup 
 
-Stata (SSC):
+### Stata (SSC):
 ```s
 ssc install twowayfeweights, replace
 ```
 
-R (GitHub) *CRAN coming soon*:
+### R:
+
 ```s
-# install.packages("remotes")
-remotes::install_github("chaisemartinPackages/twowayfeweights/R")
+install.packages("TwoWayFEWeights")
 ```
 
 ## Syntax
