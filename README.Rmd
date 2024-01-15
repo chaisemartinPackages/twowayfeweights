@@ -30,15 +30,10 @@ ssc install twowayfeweights, replace
 ```s
 install.packages("TwoWayFEWeights")
 ```
+`r badger::badge_cran_release("TwoWayFEWeights", "green")`
+`r badger::badge_cran_download("TwoWayFEWeights", "last-week", "green")`
+`r badger::badge_cran_download("badger", "grand-total", "green")`
 
-
-```{r, echo = FALSE, results='asis'}
-cat(
-	badge_cran_release("TwoWayFEWeights", "green"),
-	badge_cran_download("TwoWayFEWeights", "last-week", "green"),
-  badge_cran_download("badger", "grand-total", "green")
-)
-```
 ## Syntax
 
 Stata:
