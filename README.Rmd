@@ -31,6 +31,7 @@ ssc install twowayfeweights, replace
 install.packages("TwoWayFEWeights")
 ```
 
+
 ```{r, echo = FALSE, results='asis'}
 cat(
 	badge_cran_release("TwoWayFEWeights", "green"),
