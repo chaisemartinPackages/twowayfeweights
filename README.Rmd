@@ -4,7 +4,7 @@ output:
     variant: markdown_github
 ---
 
-```r{echo = FALSE, results = HIDE, message = FALSE}
+```{r echo = FALSE, results = "hide", message = FALSE}
     library(badger)
 ```
 

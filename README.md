@@ -1,5 +1,3 @@
-`r{echo = FALSE, results = HIDE, message = FALSE}     library(badger)`
-
 # twowayfeweights
 
 Estimates the weights attached to the two-way fixed effects regressions
