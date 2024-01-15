@@ -14,8 +14,6 @@ Estimates the weights attached to the two-way fixed effects regressions studied 
 ```{r, echo = FALSE, results='asis'}
 cat(
 	badge_cran_release("TwoWayFEWeights", "green"),
-	badge_cran_download("TwoWayFEWeights", "grand-total", "green"),
-	badge_cran_download("TwoWayFEWeights", "last-month", "green"),
 	badge_cran_download("TwoWayFEWeights", "last-week", "green")
 )
 ```

@@ -7,8 +7,6 @@ well as summary measures of these regressions’ robustness to
 heterogeneous treatment effects.
 
 [![](https://www.r-pkg.org/badges/version/TwoWayFEWeights?color=green)](https://cran.r-project.org/package=TwoWayFEWeights)
-[![](http://cranlogs.r-pkg.org/badges/grand-total/TwoWayFEWeights?color=green)](https://cran.r-project.org/package=TwoWayFEWeights)
-[![](http://cranlogs.r-pkg.org/badges/last-month/TwoWayFEWeights?color=green)](https://cran.r-project.org/package=TwoWayFEWeights)
 [![](http://cranlogs.r-pkg.org/badges/last-week/TwoWayFEWeights?color=green)](https://cran.r-project.org/package=TwoWayFEWeights)
 
 ## Setup
