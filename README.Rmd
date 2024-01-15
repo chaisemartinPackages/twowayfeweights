@@ -14,12 +14,6 @@ Estimates the weights attached to the two-way fixed effects regressions studied 
 ```{r, echo = FALSE, results='asis'}
 cat(
   badge_custom("R", "CRAN", "green", "https://cran.r-project.org/web/packages/TwoWayFEWeights/index.html"),
-	badge_cran_release("TwoWayFEWeights", "green"),
-	badge_cran_download("TwoWayFEWeights", "last-week", "green")
-)
-```
-```{r, echo = FALSE, results='asis'}
-cat(
   badge_custom("Stata", "SSC", "blue", "https://ideas.repec.org/c/boc/bocode/s458611.html")
 )
 ```
@@ -37,6 +31,13 @@ ssc install twowayfeweights, replace
 install.packages("TwoWayFEWeights")
 ```
 
+```{r, echo = FALSE, results='asis'}
+cat(
+	badge_cran_release("TwoWayFEWeights", "green"),
+	badge_cran_download("TwoWayFEWeights", "last-week", "green"),
+  badge_cran_download("badger", "grand-total", "green")
+)
+```
 ## Syntax
 
 Stata:
