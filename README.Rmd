@@ -18,6 +18,11 @@ cat(
 	badge_cran_download("TwoWayFEWeights", "last-week", "green")
 )
 ```
+```{r, echo = FALSE, results='asis'}
+cat(
+  badge_custom("Stata", "SSC", "blue", "https://ideas.repec.org/c/boc/bocode/s458611.html")
+)
+```
 
 ## Setup 
 

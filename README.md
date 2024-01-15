@@ -9,6 +9,7 @@ heterogeneous treatment effects.
 [![](https://img.shields.io/badge/R-CRAN-green.svg)](https://cran.r-project.org/web/packages/TwoWayFEWeights/index.html)
 [![](https://www.r-pkg.org/badges/version/TwoWayFEWeights?color=green)](https://cran.r-project.org/package=TwoWayFEWeights)
 [![](http://cranlogs.r-pkg.org/badges/last-week/TwoWayFEWeights?color=green)](https://cran.r-project.org/package=TwoWayFEWeights)
+[![](https://img.shields.io/badge/Stata-SSC-blue.svg)](https://ideas.repec.org/c/boc/bocode/s458611.html)
 
 ## Setup
 
