@@ -32,7 +32,7 @@ install.packages("TwoWayFEWeights")
 ```
 `r badger::badge_cran_release("TwoWayFEWeights", "green")`
 `r badger::badge_cran_download("TwoWayFEWeights", "last-week", "green")`
-`r badger::badge_cran_download("badger", "grand-total", "green")`
+`r badger::badge_cran_download("TwoWayFEWeights", "grand-total", "green")`
 
 ## Syntax
 

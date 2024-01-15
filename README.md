@@ -25,7 +25,7 @@ install.packages("TwoWayFEWeights")
 
 [![](https://www.r-pkg.org/badges/version/TwoWayFEWeights?color=green)](https://cran.r-project.org/package=TwoWayFEWeights)
 [![](http://cranlogs.r-pkg.org/badges/last-week/TwoWayFEWeights?color=green)](https://cran.r-project.org/package=TwoWayFEWeights)
-[![](http://cranlogs.r-pkg.org/badges/grand-total/badger?color=green)](https://cran.r-project.org/package=badger)
+[![](http://cranlogs.r-pkg.org/badges/grand-total/TwoWayFEWeights?color=green)](https://cran.r-project.org/package=TwoWayFEWeights)
 
 ## Syntax
 
