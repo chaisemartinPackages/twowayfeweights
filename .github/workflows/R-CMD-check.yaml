@@ -28,4 +28,5 @@ jobs:
           working-directory: ./R
 
       - uses: r-lib/actions/check-r-package@v2
-        working-directory: ./R
+        with:
+          working-directory: ./R
