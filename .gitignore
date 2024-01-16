@@ -3,3 +3,5 @@
 .Rhistory
 .RData
 .Ruserdata
+safe_copy.py
+render.R
