@@ -177,7 +177,13 @@ twowayfeweights = function(
   if (!is.null(other_treatments) && type != "feTR") {
     stop("When the `other_treatments` argument is specified, you need to specify `type = 'feTR'` too.")
   }
-  
+
+  for (v in c(Y, G, T, D, D0)) {
+    if (!inherits(data[[v]], "numeric")){
+      data[[v]] <- as.numeric(data[[v]])
+    }
+  }
+
   controls_rename = get_controls_rename(controls)
   treatments_rename = get_treatments_rename(other_treatments)
   random_weight_rename = get_random_weight_rename(test_random_weights)
