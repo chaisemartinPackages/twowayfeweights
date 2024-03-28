@@ -11,7 +11,7 @@ Authors@R:
     person("Doulo", "Sow", role = "aut", email = "doulo.sow@ensae.fr"),
     person("Shuo", "Zhang", role = "aut", email = "shuo_zhang@ucsb.edu"),
     person("Clément", "de Chaisemartin", role = "aut", email = "clement.dechaisemartin@sciencespo.fr"),
-    person("McDermott", "Grant", role = "ctb", email = "gmcd@amazon.com")
+    person("Grant", "McDermott", role = "ctb", email = "gmcd@amazon.com")
     )
 Maintainer: Diego Ciccia <diego.ciccia@sciencespo.fr>
 Description: 
@@ -37,5 +37,6 @@ Author: Diego Ciccia [aut, cre],
 	Mélitine Malezieux [aut],
 	Doulo Sow [aut],
 	Shuo Zhang [aut],
-  	Clément de Chaisemartin [aut]
+  	Clément de Chaisemartin [aut],
+    Grant McDermott [ctb]
 RoxygenNote: 7.2.3
