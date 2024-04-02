@@ -108,6 +108,7 @@
 #' @references de Chaisemartin, C and D'Haultfoeuille, X (2020a). American Economic Review, vol. 110, no. 9.  Two-Way Fixed Effects Estimators with Heterogeneous Treatment Effects.
 #' @references de Chaisemartin, C and D'Haultfoeuille, X (2020b).  Two-way fixed effects regressions with several treatments.
 #' @importFrom utils write.csv
+#' @importFrom haven read_dta
 #' @examples
 #' # The following example is based on data from F. Vella and M. Verbeek (1998), 
 #' # "Whose Wages Do Unions Raise? A Dynamic Model of Unionism and Wage Rate 
@@ -117,14 +118,10 @@
 #' # Run the following lines to download the dataset in your local working 
 #' # directory and load it to your R environment:
 #' 
-#' # install.packages("haven")
 #' repo = "chaisemartinPackages/twowayfeweights/main"
 #' file = "wagepan_twfeweights.dta"
 #' url = paste("https://raw.githubusercontent.com", repo, file, sep = "/")
 #' wagepan =  haven::read_dta(url)
-#' 
-#' # Now let's load this package and run some estimations.
-#' library(TwoWayFEWeights)
 #' 
 #' # The default `type = "feTR"` estimation strategy uses a fixed-effects
 #' # strategy under the assumption that parallel trends holds. 

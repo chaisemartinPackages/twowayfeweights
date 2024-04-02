@@ -28,8 +28,7 @@ Imports:
   fixest,
   rlang,
   stats,
-  utils
-Suggests:
+  utils,
   haven
 NeedsCompilation: no
 Author: Diego Ciccia [aut, cre],

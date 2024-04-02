@@ -3,6 +3,7 @@
 S3method(print,twowayfeweights)
 export(twowayfeweights)
 importFrom(fixest,feols)
+importFrom(haven,read_dta)
 importFrom(magrittr,"%>%")
 importFrom(rlang,":=")
 importFrom(rlang,sym)

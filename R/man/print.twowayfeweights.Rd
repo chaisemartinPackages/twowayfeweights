@@ -23,14 +23,10 @@ Printed display of twowayfeweights objects.
 # Run the following lines to download the dataset in your local working 
 # directory and load it to your R environment:
 
-# install.packages("haven")
 repo = "chaisemartinPackages/twowayfeweights/main"
 file = "wagepan_twfeweights.dta"
 url = paste("https://raw.githubusercontent.com", repo, file, sep = "/")
 wagepan =  haven::read_dta(url)
-
-# Now let's load this package and run some estimations.
-library(TwoWayFEWeights)
 
 # The default `type = "feTR"` estimation strategy uses a fixed-effects
 # strategy under the assumption that parallel trends holds. 
