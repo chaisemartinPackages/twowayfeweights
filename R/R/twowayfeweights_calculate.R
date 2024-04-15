@@ -16,6 +16,7 @@ twowayfeweights_calculate = function(
     treatments = NULL
 ) {
   
+  suppressWarnings({
   .data = NULL
   
   type = match.arg(type)
@@ -36,7 +37,7 @@ twowayfeweights_calculate = function(
   obs = sum(dat$weights)
   gdat = dat %>%
     dplyr::group_by(.data$G, .data$T) %>%
-    dplyr::summarise(P_gt = sum(.data$weights))
+    dplyr::summarise(P_gt = sum(.data$weights)) %>% dplyr::ungroup()
   dat = dat %>% 
     dplyr::left_join(gdat, by=c("T", "G")) %>% 
     dplyr::mutate(P_gt = .data$P_gt / obs)
@@ -105,7 +106,7 @@ twowayfeweights_calculate = function(
       dplyr::group_by(.data$G) %>%
       dplyr::mutate(E_eps_1_g_ge_aux = rev(cumsum(rev(.data$eps_1_weight)))) %>%
       dplyr::mutate(weights_aux = rev(cumsum(rev(.data$weights)))) %>%
-      dplyr::mutate(E_eps_1_g_ge = .data$E_eps_1_g_ge_aux / .data$weights_aux)
+      dplyr::mutate(E_eps_1_g_ge = .data$E_eps_1_g_ge_aux / .data$weights_aux) %>% dplyr::ungroup()
     
   } else if (type=="fdTR") {
     
@@ -132,7 +133,7 @@ twowayfeweights_calculate = function(
     # 	drop group_period_unit
     dat = dat %>%
       dplyr::group_by(.data$G, .data$Tfactor) %>%
-      dplyr::filter(dplyr::row_number(.data$D) == 1)
+      dplyr::filter(dplyr::row_number(.data$D) == 1) %>% dplyr::ungroup()
     
   } else if (type == "fdTR") {
     
@@ -141,7 +142,7 @@ twowayfeweights_calculate = function(
       dplyr::group_by(.data$G) %>% 
       dplyr::mutate(w_tilde_2 = ifelse(.data$TFactorNum + 1 == dplyr::lead(.data$TFactorNum), .data$eps_2 - dplyr::lead(.data$eps_2) * (dplyr::lead(.data$P_gt) / .data$P_gt), NA)) %>%
       dplyr::mutate(w_tilde_2 = ifelse(is.na(.data$w_tilde_2) | is.infinite(.data$w_tilde_2), .data$eps_2, .data$w_tilde_2)) %>%
-      dplyr::mutate(w_tilde_2_E_D_gt = .data$w_tilde_2 * .data$D0)
+      dplyr::mutate(w_tilde_2_E_D_gt = .data$w_tilde_2 * .data$D0) %>% dplyr::ungroup()
     
     denom_W = weighted.mean(dat$w_tilde_2_E_D_gt, dat$P_gt, na.rm = TRUE)
     dat = dat %>% 
@@ -162,7 +163,7 @@ twowayfeweights_calculate = function(
       dplyr::mutate(s_gt = dplyr::case_when(.data$delta_D > 0 ~ 1,
                                             .data$delta_D < 0 ~ -1,
                                             TRUE ~ 0)) %>%
-      dplyr::mutate(nat_weight = .data$P_gt * .data$abs_delta_D)
+      dplyr::mutate(nat_weight = .data$P_gt * .data$abs_delta_D) %>% dplyr::ungroup()
     
     P_S = sum(dat$nat_weight, na.rm = TRUE)
     dat = dat %>% 
@@ -198,6 +199,7 @@ twowayfeweights_calculate = function(
   
   
   return(list(dat = dat, beta = beta))
+  })
   
 }
   

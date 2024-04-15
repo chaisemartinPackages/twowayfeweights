@@ -7,7 +7,7 @@
 #' @importFrom rlang :=
 #' @noRd
 twowayfeweights_normalize_var = function(df, varname) {
-  
+  suppressWarnings({ 
   .data = NULL
   
   var = rlang::sym(varname)
@@ -23,6 +23,7 @@ twowayfeweights_normalize_var = function(df, varname) {
       dplyr::select(-.data$tmp_mean_gt) %>%
       dplyr::select(-.data$tmp_sd_gt)
   }
+  })
   
   return(list(retcode = (tmp_sd_gt_sum > 0), df = df))
 }
