@@ -165,6 +165,7 @@ twowayfeweights = function(
     path = NULL
     ) {
   
+  suppressWarnings({
   # type = match.arg(tolower(type))
   type = match.arg(type)
   if (type == "fdTR" && is.null(D0)) {
@@ -204,6 +205,7 @@ twowayfeweights = function(
     random_weights = random_weight_rename,
     treatments     = treatments_rename
   )
+  })
   
   # if (is.null(other_treatments)) {
   #   res = twowayfeweights_result(res$dat, res$beta, random_weight_rename)

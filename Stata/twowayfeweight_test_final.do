@@ -1,6 +1,7 @@
 clear
-local G = 10000
-local T = 100
+local G = 100
+local T = 10
+qui do "twowayfeweights.ado"
 
 set obs `G'
 gen g = _n
@@ -20,7 +21,7 @@ gen Y = uniform() + D*F_g
 gen weights = uniform()
 
 twowayfeweights Y g t D, type(feTR) summary_measures
-twowayfeweights Y g t D, type(fdTR) summary_measures
+twowayfeweights Y g t D D0, type(fdTR) summary_measures
 twowayfeweights Y g t D, type(feS) summary_measures
 twowayfeweights Y g t D, type(fdS) summary_measures
 twowayfeweights Y g t D, type(feTR) other_treatments(D2) summary_measures

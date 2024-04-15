@@ -413,7 +413,7 @@ restore
 
 
 	di ""
-	di as text "Under the common trends assumption, beta estimates a weighted sum of " nweights " `ctitle's. " _newline nplus " `ctitle's receive a positive weight, and " nminus " receive a negative weight."
+	di as text "Under the common trends assumption, the TWFE coefficient beta, equal to `=strtrim("`: di %9.4f beta'")', estimates a weighted sum of " nweights " `ctitle's. " _newline nplus " `ctitle's receive a positive weight, and " nminus " receive a negative weight."
 	di as result "{hline 48}"
 	di as result "`row_1'"
 	di as result "{hline 48}"
@@ -700,7 +700,7 @@ restore
 	local row_4 = "`row_4'" + r(row_43)
 
 	di ""
-	di as text "Under the common trends assumption, beta estimates the sum of several terms."
+	di as text "Under the common trends assumption, the TWFE coefficient beta, equal to `=strtrim("`: di %9.4f beta'")', estimates the sum of several terms."
 	di as text "The first term is a weighted sum of " nweights " ATTs of the treatment." _newline nplus " ATTs receive a positive weight, and " nminus " receive a negative weight."
 	di as result "{hline 48}"
 	di as result "`row_1'"

@@ -24,14 +24,14 @@ print.twowayfeweights = function(x, ...) {
   if (other_treats) {
     assumption_string = paste(
       assumption, ", ",
-      "beta estimates the sum of several terms.\n\n",
+      sprintf("the TWFE coefficient beta, equal to %.4f, estimates the sum of several terms.\n\n", x$beta),
       sprintf("The first term is a weighted sum of %d %ss.", x$nr_weights, treat), 
       sep = ""
     )
   } else {
     assumption_string = paste(
       assumption, ", ", 
-      sprintf("beta estimates a weighted sum of %d %ss.", x$nr_weights, treat), 
+      sprintf("the TWFE coefficient beta, equal to %.4f, estimates a weighted sum of %d %ss.", x$beta, x$nr_weights, treat), 
       sep = ""
     )
   } 
@@ -57,7 +57,7 @@ print.twowayfeweights = function(x, ...) {
 
   # cat("\n")
   # cat(cli::rule())
-  # cat("\n")
+  cat("\n")
   cat(assumption_string)
   cat("\n")
   cat(weight_string)

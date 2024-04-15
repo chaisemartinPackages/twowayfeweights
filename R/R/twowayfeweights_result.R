@@ -13,7 +13,7 @@
 #' @importFrom magrittr %>%
 #' @noRd
 twowayfeweights_result = function(dat, beta, random_weights, treatments = NULL) {
-  
+  suppressWarnings({ 
   .data = NULL
   
   # Two distinct cases/workflows:
@@ -95,6 +95,7 @@ twowayfeweights_result = function(dat, beta, random_weights, treatments = NULL) 
     ret[["dat_result"]] <- dat_result
     
   }
+  })
   
   
   return(ret)
