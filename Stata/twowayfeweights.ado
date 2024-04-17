@@ -34,7 +34,7 @@ program twowayfeweights, eclass
 	gen `treatment'=`5'
 	}
 	
-	preserve
+//	preserve
 	
 	*Keeping if sample
 	if `"`if'"' != "" {
@@ -361,7 +361,7 @@ program twowayfeweights, eclass
 	}
 	
 	
-restore
+//restore
 
 *end of quietly condition
 }
@@ -479,7 +479,7 @@ if "`other_treatments'"!=""{
 	gen `time'=`3'
 	gen `meantreat'=`4'
 	
-	preserve
+	//preserve
 	
 	*Keeping if sample
 	if `"`if'"' != "" {
@@ -594,6 +594,10 @@ if "`other_treatments'"!=""{
 	local j=1
 	foreach var of varlist `other_treatments' {
 	gen weight_others`j'=W*P_gt*`var'/mean_D
+
+	local limit_sensitivity = 10^(-10)
+	replace weight_others`j' = 0 if abs(weight_others`j') < `limit_sensitivity' 
+
 	local j=`j'+1
 	}
 	
@@ -606,6 +610,10 @@ if "`other_treatments'"!=""{
 	bys `group' `time': gen group_period_unit=(_n==1)	
 	drop if group_period_unit==0
 	drop group_period_unit
+
+	* Adjust weights close to zero
+	local limit_sensitivity = 10^(-10)
+	replace weight = 0 if abs(weight) < `limit_sensitivity' 
 	
 	* Computing the sum and the number of positive/negative weights
 		
@@ -658,7 +666,7 @@ if "`other_treatments'"!=""{
 	save "`path'", replace
 	}
 
-restore
+//restore
 
 *end of quietly condition
 	}
@@ -713,8 +721,10 @@ restore
 
 	local j=1
 	foreach var of varlist `other_treatments' {
-		if summinus_others`j' == . {
-			scalar summinus_others`j' = 0
+		foreach sign in plus minus {
+			if sum`sign'_others`j' == . {
+				scalar sum`sign'_others`j' = 0
+			}
 		}
 		local row_1 = ""
 		fit_str , str("Other treat.: `var'") len(24) out(row_11) left
