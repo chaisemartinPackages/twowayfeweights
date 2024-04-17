@@ -134,7 +134,7 @@ twowayfeweights_filter <- function(df, Y, G, T, D, D0, cmd_type, controls, treat
 ##
 # twowayfeweights_summarize_weights
 twowayfeweights_summarize_weights <- function(df, var_weight) {
-  
+
   weight_plus <- df[[var_weight]][df[[var_weight]] > 0 & !is.na(df[[var_weight]])]
   nr_plus <- length(weight_plus)
   sum_plus <- sum(weight_plus, na.rm = TRUE)

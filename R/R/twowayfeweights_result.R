@@ -73,6 +73,10 @@ twowayfeweights_result = function(dat, beta, random_weights, treatments = NULL) 
     }
     
   } else {
+    limit_sensitivity = 10^(-10)
+    for (v in c("result", treatments)) {
+      dat[[paste0("weight_",v)]] = ifelse(dat[[paste0("weight_",v)]] < limit_sensitivity & dat[[paste0("weight_",v)]] > -limit_sensitivity, 0, dat[[paste0("weight_",v)]])
+    }
     
     columns = c("T", "G", "weight_result")
     ret = twowayfeweights_summarize_weights(dat, "weight_result")
