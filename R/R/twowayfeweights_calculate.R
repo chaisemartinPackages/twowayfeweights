@@ -197,7 +197,6 @@ twowayfeweights_calculate = function(
       dplyr::select(-.data$eps_2, -.data$P_gt, -.data$abs_delta_D)
   }
   
-  
   return(list(dat = dat, beta = beta))
   })
   

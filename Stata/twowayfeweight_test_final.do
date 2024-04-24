@@ -1,4 +1,18 @@
 clear
+local G = 2
+local T = 6
+qui do "twowayfeweights.ado"
+set obs `=`G' * `T''
+gen G = floor((_n-1)/`T')
+bys G: gen T = _n
+gen D = G == 0 & T >= 4 | G == 1 & T >= 5
+gen E1 = G == 0 & T == 4 | G == 1 & T == 5
+gen E2 = G == 0 & T == 5 | G == 1 & T == 6
+gen E3 = G == 0 & T == 6
+gen Y = uniform()
+twowayfeweights Y G T E1, other_treatments(E2 E3) type(feTR)
+
+clear
 local G = 100
 local T = 10
 qui do "twowayfeweights.ado"

@@ -34,7 +34,7 @@ program twowayfeweights, eclass
 	gen `treatment'=`5'
 	}
 	
-//	preserve
+	preserve
 	
 	*Keeping if sample
 	if `"`if'"' != "" {
@@ -282,6 +282,12 @@ program twowayfeweights, eclass
 	gen weight=W*nat_weight
 	
 	}
+
+	// Modif Diego_weights: counting cells with non-zero treatment
+	gen count_nat_weights = nat_weight != 0
+	sum count_nat_weights
+	scalar tot_cells = r(sum)
+	drop count_nat_weights
 	
 /// Results	
 
@@ -361,7 +367,7 @@ program twowayfeweights, eclass
 	}
 	
 	
-//restore
+  restore
 
 *end of quietly condition
 }
@@ -413,7 +419,11 @@ program twowayfeweights, eclass
 
 
 	di ""
-	di as text "Under the common trends assumption, the TWFE coefficient beta, equal to `=strtrim("`: di %9.4f beta'")', estimates a weighted sum of " nweights " `ctitle's. " _newline nplus " `ctitle's receive a positive weight, and " nminus " receive a negative weight."
+	di as text "Under the common trends assumption, the TWFE coefficient beta, equal to `=strtrim("`: di %9.4f beta'")', estimates a weighted sum of " tot_cells " `ctitle's. " _newline nplus " `ctitle's receive a positive weight, and " nminus " receive a negative weight."
+	if tot_cells > nplus + nminus {
+		di as text `=tot_cells - (nplus + nminus)' " `ctitle's receive weights numerically equal to zero."
+
+	}
 	di as result "{hline 48}"
 	di as result "`row_1'"
 	di as result "{hline 48}"
@@ -479,7 +489,7 @@ if "`other_treatments'"!=""{
 	gen `time'=`3'
 	gen `meantreat'=`4'
 	
-	//preserve
+	preserve
 	
 	*Keeping if sample
 	if `"`if'"' != "" {
@@ -591,12 +601,24 @@ if "`other_treatments'"!=""{
 	scalar denom_W=r(mean)
 	gen W=eps_1*mean_D/denom_W
 	gen weight=W*nat_weight
+
+	// Modif Diego_weights: counting cells with non-zero treatment
+	gen count_nat_weights = nat_weight != 0
+	sum count_nat_weights
+	scalar tot_cells = r(sum)
+	drop count_nat_weights
+
 	local j=1
 	foreach var of varlist `other_treatments' {
 	gen weight_others`j'=W*P_gt*`var'/mean_D
 
 	local limit_sensitivity = 10^(-10)
 	replace weight_others`j' = 0 if abs(weight_others`j') < `limit_sensitivity' 
+
+	gen count_`j' = `var' != 0
+	sum count_`j'
+	scalar tot_cells_`j' = r(sum)
+	drop count_`j'
 
 	local j=`j'+1
 	}
@@ -666,7 +688,7 @@ if "`other_treatments'"!=""{
 	save "`path'", replace
 	}
 
-//restore
+  restore
 
 *end of quietly condition
 	}
@@ -709,7 +731,10 @@ if "`other_treatments'"!=""{
 
 	di ""
 	di as text "Under the common trends assumption, the TWFE coefficient beta, equal to `=strtrim("`: di %9.4f beta'")', estimates the sum of several terms."
-	di as text "The first term is a weighted sum of " nweights " ATTs of the treatment." _newline nplus " ATTs receive a positive weight, and " nminus " receive a negative weight."
+	di as text "The first term is a weighted sum of " tot_cells " ATTs of the treatment." _newline nplus " ATTs receive a positive weight, and " nminus " receive a negative weight."
+	if tot_cells > nplus + nminus {
+		di as text `=tot_cells - (nplus + nminus)' " ATTs receive weights numerically equal to zero."
+	}
 	di as result "{hline 48}"
 	di as result "`row_1'"
 	di as result "{hline 48}"
@@ -759,7 +784,10 @@ if "`other_treatments'"!=""{
 		local row_4 = "`row_4'" + r(row_43)
 
 		di ""
-		di as text "The next term is a weighted sum of " nweights_others`j' " ATTs of treatment " `j' " included in the other_treatments option." _newline nplus_others`j' " ATTs receive a positive weight, and " nminus_others`j' " receive a negative weight."
+		di as text "The next term is a weighted sum of " tot_cells_`j' " ATTs of treatment " `j' " included in the other_treatments option." _newline nplus_others`j' " ATTs receive a positive weight, and " nminus_others`j' " receive a negative weight."
+		if tot_cells > nplus + nminus {
+			di as text `=tot_cells_`j' - (nplus_others`j' + nminus_others`j')' " ATTs receive weights numerically equal to zero."
+		}
 		di as result "{hline 48}"
 		di as result "`row_1'"
 		di as result "{hline 48}"
