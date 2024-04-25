@@ -376,14 +376,7 @@ program twowayfeweights, eclass
 	if summinus == . {
 		scalar summinus = 0
 	}
-	{
-		if "`type'"=="feTR"|"`type'"=="fdTR"{	
-			local ctitle = "ATT"
-		}
-		else if "`type'"=="feS"|"`type'"=="fdS"{
-			local ctitle = "LATE"
-		}
-	}
+	local ctitle = "ATT"
 
 	local row_1 = ""
 	fit_str , str("Treat. var: `4'") len(24) out(row_11) left
@@ -417,12 +410,19 @@ program twowayfeweights, eclass
 	fit_str , str("`: di %9.4f `=summinus + sumplus''") len(12) out(row_43) left
 	local row_4 = "`row_4'" + r(row_43)
 
+	if inlist("`type'", "feTR", "fdTR") {
+		local assumptions "Under the common trends assumption,"
+	} 
+	else if inlist("`type'", "feS", "fdS") {
+		local assumptions "Under the common trends assumption and" _newline "the assumption that groups' treatment effects do not change over time,"
+	}
+
 
 	di ""
-	di as text "Under the common trends assumption, the TWFE coefficient beta, equal to `=strtrim("`: di %9.4f beta'")', estimates a weighted sum of " tot_cells " `ctitle's. " _newline nplus " `ctitle's receive a positive weight, and " nminus " receive a negative weight."
+	di as text "`assumptions'"
+	di as text "the TWFE coefficient beta, equal to `=strtrim("`: di %9.4f beta'")', estimates a weighted sum of " nplus + nminus " `ctitle's. " _newline nplus " `ctitle's receive a positive weight, and " nminus " receive a negative weight."
 	if tot_cells > nplus + nminus {
-		di as text `=tot_cells - (nplus + nminus)' " `ctitle's receive weights numerically equal to zero."
-
+		di as text `=tot_cells' " (g,t) cells receive the treatment, but the `ctitle's of " `=tot_cells - (nplus + nminus)' " cells receive a weight equal to zero."
 	}
 	di as result "{hline 48}"
 	di as result "`row_1'"
@@ -444,7 +444,7 @@ program twowayfeweights, eclass
 		di as result "`srow_fe'"
 		di as result "`srow_2'"
 		if summinus<0{
-			local srow_3 "min `=uchar(963)'(`=uchar(916)') compatible with `=uchar(946)'_`subscr' and `=uchar(916)'_TR of a different sign: `: di %9.4f sensibility2'"					
+			local srow_3 "min `=uchar(963)'(`=uchar(916)') compatible with treatment effect of opposite sign than `=uchar(946)'_`subscr' in all (g,t) cells: `: di %9.4f sensibility2'"					
 			di as result "`srow_3'"
 		}
 		di as text "`discl'"
@@ -730,10 +730,11 @@ if "`other_treatments'"!=""{
 	local row_4 = "`row_4'" + r(row_43)
 
 	di ""
-	di as text "Under the common trends assumption, the TWFE coefficient beta, equal to `=strtrim("`: di %9.4f beta'")', estimates the sum of several terms."
-	di as text "The first term is a weighted sum of " tot_cells " ATTs of the treatment." _newline nplus " ATTs receive a positive weight, and " nminus " receive a negative weight."
+	di as text "Under the common trends assumption," _newline "the TWFE coefficient beta, equal to `=strtrim("`: di %9.4f beta'")', estimates the sum of several terms."
+	di ""
+	di as text "The first term is a weighted sum of " nplus + nminus " ATTs of the treatment." _newline nplus " ATTs receive a positive weight, and " nminus " receive a negative weight."
 	if tot_cells > nplus + nminus {
-		di as text `=tot_cells - (nplus + nminus)' " ATTs receive weights numerically equal to zero."
+		di as text `=tot_cells' " (g,t) cells receive the treatment, but the ATTs of " `=tot_cells - (nplus + nminus)' " cells receive a weight equal to zero."
 	}
 	di as result "{hline 48}"
 	di as result "`row_1'"
@@ -784,9 +785,9 @@ if "`other_treatments'"!=""{
 		local row_4 = "`row_4'" + r(row_43)
 
 		di ""
-		di as text "The next term is a weighted sum of " tot_cells_`j' " ATTs of treatment " `j' " included in the other_treatments option." _newline nplus_others`j' " ATTs receive a positive weight, and " nminus_others`j' " receive a negative weight."
-		if tot_cells > nplus + nminus {
-			di as text `=tot_cells_`j' - (nplus_others`j' + nminus_others`j')' " ATTs receive weights numerically equal to zero."
+		di as text "The next term is a weighted sum of " nplus_others`j' + nminus_others`j' " ATTs of treatment " `j' " included in the other_treatments option." _newline nplus_others`j' " ATTs receive a positive weight, and " nminus_others`j' " receive a negative weight."
+		if tot_cells_`j' >  nplus_others`j' + nminus_others`j' {
+			di as text `=tot_cells_`j'' " (g,t) cells receive the treatment, but the ATTs of " `=tot_cells_`j' - (nplus_others`j' + nminus_others`j')' " cells receive a weight equal to zero."
 		}
 		di as result "{hline 48}"
 		di as result "`row_1'"
