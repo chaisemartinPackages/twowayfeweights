@@ -71,10 +71,11 @@ twowayfeweights_result = function(dat, beta, random_weights, treatments = NULL) 
       sensibility2 = dat_sens$sens_measure2[N - total_indicator + 1]
       ret$sensibility2 = sensibility2
 
-      # Since, with one treatment, we could have either D or D0 as the main treatment, 
-      # the row below computes the number of cells such that their treatment is different than 0
-      ret$tot_cells = sum(as.numeric(dat$nat_weight != 0), na.rm = TRUE)
     }
+
+    # Since, with one treatment, we could have either D or D0 as the main treatment, 
+    # the row below computes the number of cells such that their treatment is different than 0
+    ret$tot_cells = sum(as.numeric(dat$nat_weight != 0), na.rm = TRUE)
     
   } else {
     limit_sensitivity = 10^(-10)

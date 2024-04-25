@@ -13,6 +13,7 @@ gen Y = uniform()
 twowayfeweights Y G T E1, other_treatments(E2 E3) type(feTR)
 
 clear
+set seed 0
 local G = 100
 local T = 10
 qui do "twowayfeweights.ado"
@@ -33,6 +34,7 @@ gegen D0 = mean(D), by(g t)
 gen X = uniform() > 0.5
 gen Y = uniform() + D*F_g
 gen weights = uniform()
+save test_data, replace
 
 twowayfeweights Y g t D, type(feTR) summary_measures
 twowayfeweights Y g t D D0, type(fdTR) summary_measures

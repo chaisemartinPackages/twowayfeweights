@@ -9,29 +9,25 @@ print.twowayfeweights = function(x, ...) {
 
   other_treats = !is.null(x$other_treatments)
 
-  treat = if (x$type %in% c("feTR", "fdTR")) {
-      "ATT"
-    } else if (x$type %in% c("feS", "fdS")) {
-      "LATE"
-    } else "BLANK"
+  treat = "ATT"
 
-  assumption = if (treat=="ATT") {
-    "Under the common trends assumption"
-  } else if (treat=="LATE") {
-    "Under the common trends, treatment monotonicity, and if groups' treatment effect does not change over time"
+  assumption = if (x$type %in% c("feTR", "fdTR")) {
+    "Under the common trends assumption,\n"
+  } else if (x$type %in% c("feS", "fdS")) {
+    "Under the common trends, treatment monotonicity, and if groups' treatment effect does not change over time,\n"
   } else "BLANK"
 
   if (other_treats) {
     assumption_string = paste(
-      assumption, ", ",
+      assumption,
       sprintf("the TWFE coefficient beta, equal to %.4f, estimates the sum of several terms.\n\n", x$beta),
-      sprintf("The first term is a weighted sum of %d %ss.", x$tot_cells, treat), 
+      sprintf("The first term is a weighted sum of %d %ss.", x$nr_plus + x$nr_minus, treat), 
       sep = ""
     )
   } else {
     assumption_string = paste(
-      assumption, ", ", 
-      sprintf("the TWFE coefficient beta, equal to %.4f, estimates a weighted sum of %d %ss.", x$beta, x$tot_cells, treat), 
+      assumption,
+      sprintf("the TWFE coefficient beta, equal to %.4f, estimates a weighted sum of %d %ss.", x$beta, x$nr_plus + x$nr_minus, treat), 
       sep = ""
     )
   } 
@@ -43,16 +39,7 @@ print.twowayfeweights = function(x, ...) {
     x$nr_minus
   )
   if (x$tot_cells > x$nr_plus + x$nr_minus) {
-    weight_string = sprintf("%s\n%d %ss receive weights numerically equal to zero.", weight_string, x$tot_cells - (x$nr_plus + x$nr_minus), treat)
-  }
-
-  otreat_string = NULL
-  if (other_treats) {
-    otreat_string = paste0(
-      "These weighting are due to the primary treatment, \"",
-      x$params$D, 
-      "\"."
-    )
+    weight_string = sprintf("%s\n%d (g,t) cells receive the treatment, but the %ss of %d cells receive a weight equal to zero.", weight_string, x$tot_cells, treat,x$tot_cells - (x$nr_plus + x$nr_minus))
   }
 
   tot_weights = x$nr_plus + x$nr_minus
@@ -65,11 +52,6 @@ print.twowayfeweights = function(x, ...) {
   cat("\n")
   cat(weight_string)
   cat("\n")
-  if (other_treats) {
-    cat(otreat_string)
-    cat("\n")
-  }
-  # cat(cli::rule())
   cat("\n")
 
   tmat = cbind(
@@ -98,7 +80,7 @@ print.twowayfeweights = function(x, ...) {
         c(round(ox$sum_plus, 4), round(ox$sum_minus, 4), otot_sums)
       )
 
-      oassumption_string = sprintf("The next term is a weighted sum of %d %ss.", ox$tot_cells, treat)
+      oassumption_string = sprintf("The next term is a weighted sum of %d %ss.", ox$nr_plus + ox$nr_minus, treat)
       oweight_string = sprintf(
         "%d %ss receive a positive weight, and %d receive a negative weight.",
         ox$nr_plus,
@@ -106,20 +88,13 @@ print.twowayfeweights = function(x, ...) {
         ox$nr_minus
       )
       if (ox$tot_cells > ox$nr_plus + ox$nr_minus) {
-        oweight_string = sprintf("%s\n%d %ss receive weights numerically equal to zero.", oweight_string, ox$tot_cells - (ox$nr_plus + ox$nr_minus), treat)
+        oweight_string = sprintf("%s\n%d (g,t) cells receive the treatment, but the %ss of %d cells receive a weight equal to zero.", oweight_string, ox$tot_cells, treat,ox$tot_cells - (ox$nr_plus + ox$nr_minus))
       }
-      otreat_string = paste0(
-        "These weighting are due to the additional treatment, \"",
-        gsub("^OT_", "", otvar), 
-        "\"."
-      )
 
       cat("\n\n")
       cat(oassumption_string)
       cat("\n")
       cat(oweight_string)
-      cat("\n")
-      cat(otreat_string)
       cat("\n\n")
       print_treat_matrix(tmat = otmat, tvar = otvar, ttype = treat, otreat = TRUE)
 
@@ -138,7 +113,7 @@ print.twowayfeweights = function(x, ...) {
       cat(sprintf("  min \U03C3(\U0394) compatible with \U03B2_%s and \U0394_TR = 0: %.4f", subscr, x$sensibility))
       if (!is.null(x$sensibility2) && x$sum_minus < 0) {
         cat("\n")
-        cat(sprintf("  min \U03C3(\U0394) compatible with \U03B2_%s and \U0394_TR of a different sign: %.4f", subscr, x$sensibility2))
+        cat(sprintf("  min \U03C3(\U0394) compatible with treatment effect of opposite sign than \U03B2_%s in all (g,t) cells: %.4f", subscr, x$sensibility2))
       }
       cat("\n")
       cat("  Reference: Corollary 1, de Chaisemartin, C and D'Haultfoeuille, X (2020a)")
@@ -148,7 +123,7 @@ print.twowayfeweights = function(x, ...) {
   #print random weights
   if (!is.null(x$random_weights)) {
     cat("\n\n")
-    cat(cli::style_bold("Test random assignment of weights:"))
+    cat(cli::style_bold("Regression of variables possibly correlated with the treatment effect on the weights:"))
     cat("\n")
     print(x$mat)
   }
