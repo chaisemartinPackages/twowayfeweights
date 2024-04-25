@@ -22,7 +22,6 @@ ssc install twowayfeweights, replace
 ``` s
 install.packages("TwoWayFEWeights")
 ```
-[![R-CMD-check](https://github.com/DiegoCiccia/twowayfeweights/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/DiegoCiccia/twowayfeweights/actions/workflows/R-CMD-check.yaml)
 [![](https://www.r-pkg.org/badges/version/TwoWayFEWeights?color=green)](https://cran.r-project.org/package=TwoWayFEWeights)
 [![](http://cranlogs.r-pkg.org/badges/last-week/TwoWayFEWeights?color=green)](https://cran.r-project.org/package=TwoWayFEWeights)
 [![](http://cranlogs.r-pkg.org/badges/grand-total/TwoWayFEWeights?color=green)](https://cran.r-project.org/package=TwoWayFEWeights)
