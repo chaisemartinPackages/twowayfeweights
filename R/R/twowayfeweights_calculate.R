@@ -28,7 +28,7 @@ twowayfeweights_calculate = function(
   
   type_TR = type %in% c("feTR", "fdTR")
   type_fe = type %in% c("feTR", "feS")
-  
+
   if (type_TR) {
     DVAR = if (type=="feTR") "D" else if (type=="fdTR") "D0"
     mean_D = weighted.mean(dat[[DVAR]], dat$weights, na.rm = TRUE)

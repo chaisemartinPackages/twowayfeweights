@@ -8,3 +8,4 @@ render.R
 test.R
 build.R
 bug_display.do
+test_data.dta
