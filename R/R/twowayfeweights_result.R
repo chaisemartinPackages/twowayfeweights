@@ -70,6 +70,10 @@ twowayfeweights_result = function(dat, beta, random_weights, treatments = NULL) 
       total_indicator = sum(dat_sens$indicator)
       sensibility2 = dat_sens$sens_measure2[N - total_indicator + 1]
       ret$sensibility2 = sensibility2
+
+      # Since, with one treatment, we could have either D or D0 as the main treatment, 
+      # the row below computes the number of cells such that their treatment is different than 0
+      ret$tot_cells = sum(as.numeric(dat$nat_weight != 0), na.rm = TRUE)
     }
     
   } else {
@@ -80,6 +84,7 @@ twowayfeweights_result = function(dat, beta, random_weights, treatments = NULL) 
     
     columns = c("T", "G", "weight_result")
     ret = twowayfeweights_summarize_weights(dat, "weight_result")
+    ret$tot_cells = sum(as.numeric(dat$nat_weight != 0), na.rm = TRUE)
     
     if (length(random_weights) > 0) {
       ret$mat = twowayfeweights_test_random_weights(dat, random_weights)
@@ -90,6 +95,7 @@ twowayfeweights_result = function(dat, beta, random_weights, treatments = NULL) 
       columns = c(columns, varname)
       ret2 = twowayfeweights_summarize_weights(dat, varname)
       ret[[treatment]] <- ret2
+      ret[[treatment]]$tot_cells = sum(as.numeric(dat[[treatment]] != 0), na.rm = TRUE)
     }
     dat_result = dat %>% 
       dplyr::select_at(dplyr::vars(columns)) %>% 

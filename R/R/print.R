@@ -25,13 +25,13 @@ print.twowayfeweights = function(x, ...) {
     assumption_string = paste(
       assumption, ", ",
       sprintf("the TWFE coefficient beta, equal to %.4f, estimates the sum of several terms.\n\n", x$beta),
-      sprintf("The first term is a weighted sum of %d %ss.", x$nr_weights, treat), 
+      sprintf("The first term is a weighted sum of %d %ss.", x$tot_cells, treat), 
       sep = ""
     )
   } else {
     assumption_string = paste(
       assumption, ", ", 
-      sprintf("the TWFE coefficient beta, equal to %.4f, estimates a weighted sum of %d %ss.", x$beta, x$nr_weights, treat), 
+      sprintf("the TWFE coefficient beta, equal to %.4f, estimates a weighted sum of %d %ss.", x$beta, x$tot_cells, treat), 
       sep = ""
     )
   } 
@@ -42,6 +42,9 @@ print.twowayfeweights = function(x, ...) {
     treat,
     x$nr_minus
   )
+  if (x$tot_cells > x$nr_plus + x$nr_minus) {
+    weight_string = sprintf("%s\n%d %ss receive weights numerically equal to zero.", weight_string, x$tot_cells - (x$nr_plus + x$nr_minus), treat)
+  }
 
   otreat_string = NULL
   if (other_treats) {
@@ -95,13 +98,16 @@ print.twowayfeweights = function(x, ...) {
         c(round(ox$sum_plus, 4), round(ox$sum_minus, 4), otot_sums)
       )
 
-      oassumption_string = sprintf("The next term is a weighted sum of %d %ss.", ox$nr_weights, treat)
+      oassumption_string = sprintf("The next term is a weighted sum of %d %ss.", ox$tot_cells, treat)
       oweight_string = sprintf(
         "%d %ss receive a positive weight, and %d receive a negative weight.",
         ox$nr_plus,
         treat,
         ox$nr_minus
       )
+      if (ox$tot_cells > ox$nr_plus + ox$nr_minus) {
+        oweight_string = sprintf("%s\n%d %ss receive weights numerically equal to zero.", oweight_string, ox$tot_cells - (ox$nr_plus + ox$nr_minus), treat)
+      }
       otreat_string = paste0(
         "These weighting are due to the additional treatment, \"",
         gsub("^OT_", "", otvar), 
