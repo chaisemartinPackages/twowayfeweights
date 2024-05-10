@@ -9,3 +9,5 @@ test.R
 build.R
 bug_display.do
 test_data.dta
+*/out_twfew
+out_twfew_test.do
