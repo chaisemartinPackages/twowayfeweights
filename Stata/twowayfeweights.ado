@@ -40,7 +40,7 @@ program twowayfeweights, eclass
 	if `"`if'"' != "" {
 	keep `if'
 	}
-	
+
 	* Account for the presence of weight vars in the data
 	if strpos("`weight'", "weight") > 0  { 
 		cap rename `weight' var_weight
@@ -127,13 +127,12 @@ program twowayfeweights, eclass
 /// feTR weights
 	
 	if "`type'"=="feTR"{
-	
 	sum `meantreat' [aweight=weight_XX]
 	scalar mean_D=r(mean)
 	sum `outcome' [aweight=weight_XX]
-	scalar obs=r(sum_w)
+	scalar nobs_XX=r(sum_w)
 	gegen P_gt=total(weight_XX), by(`group' `time')
-	replace P_gt=P_gt/obs 
+	replace P_gt=P_gt/nobs_XX 
 	gen nat_weight= P_gt*`meantreat'/mean_D
 	
 	areg `meantreat' i.`time' `controls' [aweight=weight_XX], absorb(`group')
@@ -143,6 +142,7 @@ program twowayfeweights, eclass
 	scalar denom_W=r(mean)
 	gen W=eps_1*mean_D/denom_W
 	gen weight=W*nat_weight
+	save test_data, replace
 
 	*Computing beta
 	
@@ -164,9 +164,9 @@ program twowayfeweights, eclass
 	scalar mean_D=r(mean)
 	egen num_obs=total(weight_XX)
 	sum num_obs
-	scalar obs=r(mean)	
+	scalar nobs_XX=r(mean)	
 	gegen P_gt=total(weight_XX), by(`group' `time')
-	replace P_gt=P_gt/obs 
+	replace P_gt=P_gt/nobs_XX 
 	gen nat_weight= P_gt*`treatment'/mean_D
 	reg `meantreat' i.`time' `controls' [aweight=weight_XX]
 	predict eps_2, residuals
@@ -202,9 +202,9 @@ program twowayfeweights, eclass
 	if "`type'"=="feS"{
 	
 	sum `outcome' [aweight=weight_XX]
-	scalar obs=r(sum_w)
+	scalar nobs_XX=r(sum_w)
 	gegen P_gt=total(weight_XX), by(`group' `time')
-	replace P_gt=P_gt/obs
+	replace P_gt=P_gt/nobs_XX
 
 	areg `meantreat' i.`time' `controls' [aweight=weight_XX], absorb(`group')
 	predict eps_1, residuals
@@ -253,9 +253,9 @@ program twowayfeweights, eclass
 	if "`type'"=="fdS"{
 
 	sum `outcome' [aweight=weight_XX]
-	scalar obs=r(sum_w)
+	scalar nobs_XX=r(sum_w)
 	gegen P_gt=total(weight_XX), by(`group' `time')
-	replace P_gt=P_gt/obs
+	replace P_gt=P_gt/nobs_XX
 	
 	reg `meantreat' i.`time' `controls' [aweight=weight_XX]
 	predict eps_2, residuals
@@ -451,12 +451,24 @@ program twowayfeweights, eclass
 	}
 	
 	ereturn clear 
-	ereturn scalar sum_neg_w = summinus
+	matrix mret = J(3, 2, .)
+	matrix mret[1,1] = nplus
+	matrix mret[2,1] = nminus
+	matrix mret[3,1] = nplus + nminus
+	matrix mret[1,2] = sumplus
+	matrix mret[2,2] = summinus
+	matrix mret[3,2] = sumplus + summinus
+	matrix coln mret = "N_ATTs" "Sum_weights"
+	matrix rown mret = "Pos_Weights" "Neg_Weights" "Tot"
+	ereturn matrix M = mret
+
 	ereturn scalar lb_se_te = sensibility
 	if summinus<0{
 	ereturn scalar lb_se_te2 = sensibility2
 	}
 	ereturn scalar beta = beta
+	ereturn scalar ot = 0
+
 	if "`test_random_weights'"!=""{
 	di  as result  _newline "Regression of variables possibly correlated with the treatment effect on the weights"
 	matrix list B
@@ -590,9 +602,9 @@ if "`other_treatments'"!=""{
 	sum `meantreat' [aweight=weight_XX]
 	scalar mean_D=r(mean)
 	sum `outcome' [aweight=weight_XX]
-	scalar obs=r(sum_w)
+	scalar nobs_XX=r(sum_w)
 	gegen P_gt=total(weight_XX), by(`group' `time')
-	replace P_gt=P_gt/obs 
+	replace P_gt=P_gt/nobs_XX 
 	gen nat_weight= P_gt*`meantreat'/mean_D
 	areg `meantreat' i.`time' `controls' `other_treatments' [aweight=weight_XX], absorb(`group')
 	predict eps_1, residuals 
@@ -745,6 +757,18 @@ if "`other_treatments'"!=""{
 	di as result  "`row_4'"
 	di as result  "{hline 48}"
 
+	ereturn clear 
+	matrix mret = J(3, 2, .)
+	matrix mret[1,1] = nplus
+	matrix mret[2,1] = nminus
+	matrix mret[3,1] = nplus + nminus
+	matrix mret[1,2] = sumplus
+	matrix mret[2,2] = summinus
+	matrix mret[3,2] = sumplus + summinus
+	matrix coln mret = "N_ATTs" "Sum_weights"
+	matrix rown mret = "Pos_Weights" "Neg_Weights" "Tot"
+	ereturn matrix M1 = mret
+
 	local j=1
 	foreach var of varlist `other_treatments' {
 		foreach sign in plus minus {
@@ -797,17 +821,22 @@ if "`other_treatments'"!=""{
 		di as text 48 * "-"
 		di as result  "`row_4'"
 		di as result  "{hline 48}"
+
+		matrix mret = J(3, 2, .)
+		matrix mret[1,1] = nplus_others`j'
+		matrix mret[2,1] = nminus_others`j'
+		matrix mret[3,1] = nplus_others`j' + nminus_others`j'
+		matrix mret[1,2] = sumplus_others`j'
+		matrix mret[2,2] = summinus_others`j'
+		matrix mret[3,2] = sumplus_others`j' + summinus_others`j'
+		matrix coln mret = "N_ATTs" "Sum_weights"
+		matrix rown mret = "Pos_Weights" "Neg_Weights" "Tot"
 		local j=`j'+1
-	}
-	ereturn clear 
-	ereturn scalar sum_neg_w = summinus
-	local j=1
-	foreach var of varlist `other_treatments' {
-	ereturn scalar sum_neg_w_othertreatment`j' = summinus_others`j'
-	local j=`j'+1
+		ereturn matrix M`j' = mret
 	}
 	
 	ereturn scalar beta = beta
+	ereturn scalar ot = `j' - 1
 	if "`test_random_weights'"!=""{
 	di  as result  _newline "Regression of variables possibly correlated with the treatment effect on the weights attached to the treatment"
 	matrix list B
@@ -815,11 +844,8 @@ if "`other_treatments'"!=""{
 	}
 
 	display _newline
-	di as text "The development of this package was funded by the European Union (ERC, REALLYCREDIBLE,GA N°101043899)."
-	
-	
-	}
-	
+	di as text "The development of this package was funded by the European Union (ERC, REALLYCREDIBLE,GA N°101043899)."		
+	}	
 	}
 	
 end
@@ -836,4 +862,47 @@ else {
 }
 }
 return local `out' = "`n_str'"
+end
+
+cap program drop twowayfeweights_out
+program define twowayfeweights_out, rclass
+version 12.0
+syntax , saving(string) [standalone]
+cap confirm scalar e(ot)
+if _rc != 0 {
+	di as err "twowayfeweights output not found in ereturn"
+	exit
+}
+cap file close texout
+file open texout using `saving', write replace
+local nl = char(10)
+if "`standalone'" != "" {
+	file write texout "\documentclass{standalone}`nl'"
+	file write texout "\begin{document}`nl'"
+}
+file write texout "\begin{tabular}{lcc}`nl'\hline`nl'"
+file write texout "\hline`nl' & N. ATTs & Sum weights \\"	
+local ot = e(ot)
+if `ot' == 0 {
+	file write texout "`nl'\hline`nl'"
+	file write texout "Positive weights & `:di %9.0gc e(M)[1,1]' &  `:di %9.4gc e(M)[1,2]' \\ `nl'"
+	file write texout "Negative weights & `:di %9.0gc e(M)[2,1]' &  `:di %9.4gc e(M)[2,2]' \\ `nl'"
+	file write texout "\hline`nl'Total & `:di %9.0gc e(M)[3,1]' &  `:di %9.4gc e(M)[3,2]' \\ `nl'"
+}
+if `ot' != 0 {
+	forv j = 1/`=`ot'+1' {
+		file write texout "\hline `nl'"
+		if `j' == 1 file write texout "\multicolumn{3}{l}{\emph{Main Treatment}} \\ `nl'\hline `nl'"
+		else file write texout "&& \\ `nl'\multicolumn{3}{l}{\emph{Other Treatment `=`j'-1'}} \\ `nl'\hline `nl'"
+		file write texout "Positive weights & `:di %9.0gc e(M`j')[1,1]' &  `:di %9.4gc e(M`j')[1,2]' \\ `nl'"
+		file write texout "Negative weights & `:di %9.0gc e(M`j')[2,1]' &  `:di %9.4gc e(M`j')[2,2]' \\ `nl'"
+		file write texout "\hline`nl'Total & `:di %9.0gc e(M`j')[3,1]' &  `:di %9.4gc e(M`j')[3,2]' \\ `nl'"
+	}
+}
+file write texout "\hline\hline`nl'\end{tabular}`nl'"
+if "`standalone'" != "" {
+	file write texout "\end{document}"
+}
+file close texout
+di as text "Output saved in `saving'."
 end

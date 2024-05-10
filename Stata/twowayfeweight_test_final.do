@@ -1,22 +1,24 @@
-clear
-local G = 2
-local T = 6
-qui do "twowayfeweights.ado"
-set obs `=`G' * `T''
-gen G = floor((_n-1)/`T')
-bys G: gen T = _n
-gen D = G == 0 & T >= 4 | G == 1 & T >= 5
-gen E1 = G == 0 & T == 4 | G == 1 & T == 5
-gen E2 = G == 0 & T == 5 | G == 1 & T == 6
-gen E3 = G == 0 & T == 6
-gen Y = uniform()
-twowayfeweights Y G T E1, other_treatments(E2 E3) type(feTR)
+//clear
+//local G = 2
+//local T = 6
+//qui do "twowayfeweights.ado"
+//set obs `=`G' * `T''
+//gen G = floor((_n-1)/`T')
+//bys G: gen T = _n
+//gen D = G == 0 & T >= 4 | G == 1 & T >= 5
+//gen E1 = G == 0 & T == 4 | G == 1 & T == 5
+//gen E2 = G == 0 & T == 5 | G == 1 & T == 6
+//gen E3 = G == 0 & T == 6
+//gen Y = uniform()
+//twowayfeweights Y G T E1, other_treatments(E2 E3) type(feTR)
 
 clear
 set seed 0
 local G = 100
 local T = 10
+//cd "C:/Users/39380/C DE CHAISEMARTIN Dropbox/RAs De Chaisemartin/RAs Really Credible DID-TWFE/GitHub repo - local/twowayfeweights/Stata"
 qui do "twowayfeweights.ado"
+//ssc install twowayfeweights, replace
 
 set obs `G'
 gen g = _n
@@ -34,6 +36,7 @@ gegen D0 = mean(D), by(g t)
 gen X = uniform() > 0.5
 gen Y = uniform() + D*F_g
 gen weights = uniform()
+gen obs = _n
 save test_data, replace
 
 twowayfeweights Y g t D, type(feTR) summary_measures

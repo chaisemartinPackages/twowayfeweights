@@ -26,6 +26,10 @@ install.packages("TwoWayFEWeights")
 [![](http://cranlogs.r-pkg.org/badges/last-week/TwoWayFEWeights?color=green)](https://cran.r-project.org/package=TwoWayFEWeights)
 [![](http://cranlogs.r-pkg.org/badges/grand-total/TwoWayFEWeights?color=green)](https://cran.r-project.org/package=TwoWayFEWeights)
 
+## Vignettes
+
++ [Storing twowayfeweight output in LaTeX](https://github.com/DiegoCiccia/twowayfeweights/blob/main/vignettes/vignette_1.md)
+
 ## Syntax
 
 Stata:
