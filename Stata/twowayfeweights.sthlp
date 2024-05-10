@@ -223,6 +223,14 @@ assume that the treatment effects of (g,t) cells are drawn from a uniform distri
   If the treatment effects of (g,t) cells are all negative, they cannot follow a normal distribution, so we do not discuss that possibility here.
 {p_end}
 
+{p 4 8}
+{it:Can I export twowayfeweights output to LaTeX?}
+{p_end}
+
+{p 4 4}
+Yes. The ado file includes a {cmd:twowayfeweights_out} subcommand to export the main table as a LaTeX tabular or standalone. Please refer to this {browse "https://github.com/chaisemartinPackages/twowayfeweights/blob/main/vignettes/vignette_1.md":tutorial} for further details.
+{p_end}
+
 {marker example}{...}
 {title:Example}
 
