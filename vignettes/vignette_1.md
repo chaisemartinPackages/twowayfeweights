@@ -26,6 +26,7 @@ drop j
 order g t F_g
 gen D = t >= F_g
 gen D2 = uniform() > 0.5
+gen X = uniform() > 0.5
 gen Y = uniform() + D*F_g
 ```
 
@@ -48,7 +49,7 @@ The line above will save the main table in *filename.tex* as a TeX tabular. If y
 Lastly, the program outputs multiple tables if the *other_treatments* option is specified. In this case `twowayfeweights_out` will concatenate each of these tables in a single TeX tabular (or standalone):
 
 ```applescript
-twowayfeweights Y G t D, type(feTR) other_treatments(D2)
+twowayfeweights Y g t D, type(feTR) other_treatments(D2)
 twowayfeweights_out, saving(filename.tex)
 ```
 
@@ -75,7 +76,7 @@ est sto model_1
 reghdfe Y D X, abs(g t)
 estadd scalar neg_weights neg_weights_2
 est sto model_2
-esttab model_* using "filename.tex", replace booktabs se scalar(neg_weights, label("Negative Weights")) standalone
+esttab model_* using "filename.tex", replace booktabs se s(neg_weights, label("Negative Weights")) standalone
 ```
 
 The last line saves the regression results in a standalone TeX file. Notice the `s()` (scalar) argument and the corresponding `label` subargument.
