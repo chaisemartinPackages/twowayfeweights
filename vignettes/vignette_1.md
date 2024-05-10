@@ -33,7 +33,19 @@ twowayfeweights Y g t D, type(feTR)
 
 ## Storing the main table
 
+It is enough to run the following command to store the main table in a .tex file:
 
+```applescript
+twowayfeweights_out, saving(filename.tex)
+```
 
+The line above will save the main table in *filename.tex* as a TeX tabular. If you want to save the table as an individual TeX file that can be independently run, you could specify the **standalone** argument to the previous line. In this way, the table will be saved in a TeX file with *standalone* document class.
 
-## Integration of scalars in external regression tables
+Lastly, the program outputs multiple tables if the *other_treatments* option is specified. In this case `twowayfeweights_out` will concatenate each of these tables in a single TeX tabular (or standalone):
+
+```applescript
+twowayfeweights Y G t D, type(feTR) other_treatments(D2)
+twowayfeweights_out, saving(filename.tex)
+```
+
+## Adding scalars to external regression tables
