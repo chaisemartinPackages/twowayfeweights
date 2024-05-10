@@ -2,6 +2,10 @@
 
 In this tutorial, we show how to save the output of `twowayfeweights` in a .tex file and how to integrate its results in some of the most popular post-estimation programs. This vignette is oriented towards Stata users.
 
++ [Setup](#setup)
++ [Storing the main table](#storing-the-main-table)
++ [Adding twowayfeweights output to esttab](#adding-twowayfeweights-output-to-esttab)
+
 ## Setup
 
 In this vignette, we use a randomly generated sample from a DGP with differential adoption timing and group specific treatment effects. Under these conditions, the TWFE coefficient will be a weighted average of groups' ATTs, with some negative weights (de Chaisemartin & D'Hautfoeuille, 2020).
@@ -48,4 +52,32 @@ twowayfeweights Y G t D, type(feTR) other_treatments(D2)
 twowayfeweights_out, saving(filename.tex)
 ```
 
-## Adding scalars to external regression tables
+## Adding twowayfeweights output to esttab
+
+Generally, if we want to store a regression output in .tex table, we would use the `esttab` package. Let's assume that we want to add the sum of the negative weights as a scalar to the regression table. The code below will show an easy procedure to accomplish this. Notice that this technique works for any scalar and it can be extended to multiple scalars.
+
+First, run `twowayfeweights` with the same variables as the regression model and store the results in scalars:
+
+```applescript
+est clear
+qui twowayfeweights Y g t D, type(feTR)
+scalar neg_weights_1 = e(M)[2,2]
+qui twowayfeweights Y g t D, type(feTR) controls(X)
+scalar neg_weights_2 = e(M)[2,2]
+```
+
+Then, run the regressions and store the scalars in `esttab` using `estadd scalar`.
+
+```applescript
+reghdfe Y D, abs(g t)
+estadd scalar neg_weights neg_weights_1
+est sto model_1
+reghdfe Y D X, abs(g t)
+estadd scalar neg_weights neg_weights_2
+est sto model_2
+esttab model_* using "filename.tex", replace booktabs se scalar(neg_weights, label("Negative Weights")) standalone
+```
+
+The last line saves the regression results in a standalone TeX file. Notice the `s()` (scalar) argument and the corresponding `label` subargument.
+
+---
