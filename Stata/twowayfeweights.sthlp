@@ -262,4 +262,6 @@ Please note that the number of negative weights could be different from Section 
 
 {title:Contact}
 
-{browse "mailto:chaisemartin.packages@gmail.com":chaisemartin.packages@gmail.com}
+GitHub: {browse "https://github.com/chaisemartinPackages/twowayfeweights":chaisemartinPackages/twowayfeweights}
+
+Mail: {browse "mailto:chaisemartin.packages@gmail.com":chaisemartin.packages@gmail.com}

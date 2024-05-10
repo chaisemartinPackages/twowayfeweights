@@ -868,6 +868,11 @@ cap program drop twowayfeweights_out
 program define twowayfeweights_out, rclass
 version 12.0
 syntax , saving(string) [standalone]
+cap confirm scalar e(ot)
+if _rc != 0 {
+	di as err "twowayfeweights output not found in ereturn"
+	exit
+}
 cap file close texout
 file open texout using `saving', write replace
 local nl = char(10)
@@ -899,4 +904,5 @@ if "`standalone'" != "" {
 	file write texout "\end{document}"
 }
 file close texout
+di as text "Output saved in `saving'."
 end
