@@ -1,12 +1,19 @@
 {smcl}
 {* *! version 1  2019-02-25}{...}
+{viewerjumpto "Description" "twowayfeweights_out##description"}{...}
 {viewerjumpto "Syntax" "twowayfeweights_out##syntax"}{...}
 {viewerjumpto "Options" "twowayfeweights_out##options"}{...}
-{title:Title}
 
+{title:Title}
 {p 4 8}
 {cmd:twowayfeweights_out} {hline 2} Ancillary function of {cmd:twowayfeweights}.
-It stores the output of the main program in a TeX file.
+{p_end}
+
+{marker description}{...}
+{title:Description}
+
+{p 4 8}
+{cmd:twowayfeweights_out} stores the output of the main program in a TeX file.
 Please refer to this 
 {browse "https://github.com/chaisemartinPackages/twowayfeweights/blob/main/vignettes/vignette_1.md":tutorial} 
 for further information about this function.
@@ -20,8 +27,6 @@ for further information about this function.
 {cmd:saving(}{it:string}{cmd:)}
 [{cmd:standalone}]
 {p_end}
-
-{synoptset 28 tabbed}{...}
 
 {marker options}{...}
 {title:Options}
