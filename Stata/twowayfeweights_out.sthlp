@@ -32,7 +32,7 @@ for further information about this function.
 {title:Options}
 
 {p 4 8}
-{cmd:saving} requires a valid path (with .TeX) extension.
+{cmd:saving} requires a valid path (with .TeX extension).
 {p_end}
 
 {p 4 8}
