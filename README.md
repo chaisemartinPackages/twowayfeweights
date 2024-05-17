@@ -28,7 +28,7 @@ install.packages("TwoWayFEWeights")
 
 ## Vignettes
 
-+ [Storing twowayfeweight output in LaTeX](https://github.com/DiegoCiccia/twowayfeweights/blob/main/vignettes/vignette_1.md)
++ [Storing twowayfeweight output in LaTeX](https://github.com/chaisemartinPackages/twowayfeweights/blob/main/vignettes/vignette_1.md)
 
 ## Syntax
 
