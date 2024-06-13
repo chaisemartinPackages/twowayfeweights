@@ -142,7 +142,6 @@ program twowayfeweights, eclass
 	scalar denom_W=r(mean)
 	gen W=eps_1*mean_D/denom_W
 	gen weight=W*nat_weight
-	save test_data, replace
 
 	*Computing beta
 	
