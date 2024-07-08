@@ -30,6 +30,8 @@ Imports:
   stats,
   utils,
   haven
+Suggests:
+  tinytest
 NeedsCompilation: no
 Author: Diego Ciccia [aut, cre],
 	Felix Knau [aut],
