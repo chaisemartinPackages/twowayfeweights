@@ -2,7 +2,7 @@ Package: TwoWayFEWeights
 Type: Package
 Title: Estimation of the Weights Attached to the Two-Way Fixed Effects
         Regressions
-Version: 2.0.3
+Version: 2.0.3.99
 Authors@R: 
     c(
     person("Diego", "Ciccia", role = c("aut", "cre"), email = "diego.ciccia@sciencespo.fr"),
