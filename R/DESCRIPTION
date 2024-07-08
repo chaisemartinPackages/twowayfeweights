@@ -38,6 +38,8 @@ Author: Diego Ciccia [aut, cre],
 	Mélitine Malezieux [aut],
 	Doulo Sow [aut],
 	Shuo Zhang [aut],
-  	Clément de Chaisemartin [aut],
-    Grant McDermott [ctb]
+  Clément de Chaisemartin [aut],
+  Grant McDermott [ctb]
+URL: https://github.com/chaisemartinPackages
+BugReports: https://github.com/chaisemartinPackages/twowayfeweights/issues
 RoxygenNote: 7.2.3
