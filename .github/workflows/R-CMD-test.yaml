@@ -29,7 +29,5 @@ jobs:
         with:
           working-directory: ./R
 
-      - run: Rscript -e 'source("/inst/tinytest/test_wagepan.R")'
-        with:
-          working-directory: ./R
+      - run: Rscript -e 'source("/R/inst/tinytest/test_wagepan.R")'
 
