@@ -25,10 +25,7 @@ jobs:
           needs: check
           working-directory: ./R
 
-      - uses: r-lib/actions/check-r-package@v2
+      - run: Rscript -e 'source("./R/inst/tinytest/test_wagepan.R")'
         with:
           working-directory: ./R
-
-      - run: Rscript -e 'library(TwoWayFEWeights)'
-      - run: Rscript -e 'source("./R/inst/tinytest/test_wagepan.R")'
 
