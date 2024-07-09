@@ -2,7 +2,7 @@ Package: TwoWayFEWeights
 Type: Package
 Title: Estimation of the Weights Attached to the Two-Way Fixed Effects
         Regressions
-Version: 2.0.3
+Version: 2.0.3.99
 Authors@R: 
     c(
     person("Diego", "Ciccia", role = c("aut", "cre"), email = "diego.ciccia@sciencespo.fr"),
@@ -30,12 +30,16 @@ Imports:
   stats,
   utils,
   haven
+Suggests:
+  tinytest
 NeedsCompilation: no
 Author: Diego Ciccia [aut, cre],
 	Felix Knau [aut],
 	Mélitine Malezieux [aut],
 	Doulo Sow [aut],
 	Shuo Zhang [aut],
-  	Clément de Chaisemartin [aut],
-    Grant McDermott [ctb]
-RoxygenNote: 7.2.3
+  Clément de Chaisemartin [aut],
+  Grant McDermott [ctb]
+URL: https://github.com/chaisemartinPackages
+BugReports: https://github.com/chaisemartinPackages/twowayfeweights/issues
+RoxygenNote: 7.3.1
