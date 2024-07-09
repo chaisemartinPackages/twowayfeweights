@@ -29,5 +29,6 @@ jobs:
         with:
           working-directory: ./R
 
+      - run: Rscript -e 'library(TwoWayFEWeights)'
       - run: Rscript -e 'source("./R/inst/tinytest/test_wagepan.R")'
 
