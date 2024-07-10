@@ -21,11 +21,18 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::rcmdcheck
+          extra-packages: |
+              any::rcmdcheck
+              any::devtools
           needs: check
           working-directory: ./R
 
-      - run: Rscript -e 'source("./R/inst/tinytest/test_wagepan.R")'
+      - uses: r-lib/actions/check-r-package@v2
         with:
           working-directory: ./R
+
+      - run: Rscript -e 'library(devtools)'
+      - run: Rscript -e 'devtools::install_github("chaisemartinPackages/twowayfeweights/R")'
+      - run: Rscript -e 'library(TwoWayFEWeights)'
+      - run: Rscript -e 'source("./R/inst/tinytest/test_wagepan.R")'
 
