@@ -3,6 +3,7 @@ tinytest::exit_if_not(requireNamespace("haven", quietly = TRUE))
 library(devtools)
 devtools::install_github("chaisemartinPackages/twowayfeweights/R")
 library(TwoWayFEWeights)
+library(tinytest)
 
 url = "https://raw.githubusercontent.com/chaisemartinPackages/twowayfeweights/main/wagepan_twfeweights.dta"
 wagepan = haven::read_dta(url)
