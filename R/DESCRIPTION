@@ -2,10 +2,10 @@ Package: TwoWayFEWeights
 Type: Package
 Title: Estimation of the Weights Attached to the Two-Way Fixed Effects
         Regressions
-Version: 2.0.3.99
+Version: 2.0.4
 Authors@R: 
     c(
-    person("Diego", "Ciccia", role = c("aut", "cre"), email = "diego.ciccia@sciencespo.fr"),
+    person("Diego", "Ciccia", role = c("aut", "cre"), email = "diego.ciccia@kellogg.northwestern.edu"),
     person("Felix", "Knau", role = "aut", email = "felix.knau@sciencespo.fr"),
     person("Mélitine", "Malezieux", role = "aut", email = "melitine.malezieux@sciencespo.fr"),	
     person("Doulo", "Sow", role = "aut", email = "doulo.sow@ensae.fr"),
@@ -13,7 +13,7 @@ Authors@R:
     person("Clément", "de Chaisemartin", role = "aut", email = "clement.dechaisemartin@sciencespo.fr"),
     person("Grant", "McDermott", role = "ctb", email = "gmcd@amazon.com")
     )
-Maintainer: Diego Ciccia <diego.ciccia@sciencespo.fr>
+Maintainer: Diego Ciccia <diego.ciccia@kellogg.northwestern.edu>
 Description: 
     Estimates the weights and measure of robustness to treatment effect heterogeneity attached to two-way fixed effects regressions.
     Clément de Chaisemartin, Xavier D'Haultfœuille (2020) <DOI: 10.1257/aer.20181169>.
@@ -31,7 +31,7 @@ Imports:
   utils,
   haven
 Suggests:
-  tinytest
+  tinytest, devtools
 NeedsCompilation: no
 Author: Diego Ciccia [aut, cre],
 	Felix Knau [aut],
@@ -42,4 +42,4 @@ Author: Diego Ciccia [aut, cre],
   Grant McDermott [ctb]
 URL: https://github.com/chaisemartinPackages
 BugReports: https://github.com/chaisemartinPackages/twowayfeweights/issues
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
